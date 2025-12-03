@@ -1,36 +1,47 @@
-version: "3.9"
-
 services:
-  frontend:
-    build: ./frontend
-    container_name: frontend
-    restart: always
-    ports:
-      - "3000:3000"
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: airtable
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run dev
-    depends_on:
-      - backend
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   backend:
     build: ./backend
-    container_name: backend
-    restart: always
-    ports:
-      - "5000:5000"
+    command: npm run dev
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: npm run dev
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=airtable
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
 
   nginx:
     build: ./infrastructure/nginx
-    container_name: nginx
-    restart: always
     ports:
       - "80:80"
     depends_on:
       - frontend
       - backend
+
+volumes:
+  pgdata:
