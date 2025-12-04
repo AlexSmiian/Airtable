@@ -1,25 +1,36 @@
+version: "3.9"
+
 services:
   db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: airtable
+    image: postgres:16
+    restart: always
+    env_file:
+      - .env.${ENV}   # підхоплюємо .env.local або .env.production
     volumes:
+      - ./infrastructure/db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
-  backend:
+  seed:
     build: ./backend
-    command: npm run dev
+    command: node seed.js
+    depends_on:
+      - db
+    env_file:
+      - .env.${ENV}
     volumes:
       - ./backend:/app
       - /app/node_modules
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=airtable
+
+  backend:
+    build: ./backend
+    command: npm run dev
+    env_file:
+      - .env.${ENV}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
       - db
     ports:
@@ -27,13 +38,16 @@ services:
 
   frontend:
     build: ./frontend
+    command: npm run dev
+    env_file:
+      - .env.${ENV}
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports:
-      - "3000:3000"
     depends_on:
       - backend
+    ports:
+      - "3000:3000"
 
   nginx:
     build: ./infrastructure/nginx

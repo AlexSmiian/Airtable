@@ -1,0 +1,22 @@
+CREATE TABLE records (
+                         id SERIAL PRIMARY KEY,
+                         title TEXT,
+                         description TEXT,
+                         category TEXT,
+                         status TEXT,
+                         amount NUMERIC,
+                         quantity INT,
+                         price NUMERIC,
+                         rate NUMERIC,
+                         is_active BOOLEAN,
+                         created_at TIMESTAMP,
+                         updated_at TIMESTAMP,
+                         tags JSONB,
+                         attributes JSONB,
+                         level INT,
+                         priority INT,
+                         code TEXT,
+                         group_id INT,
+                         meta JSONB,
+                         comment TEXT
+);
