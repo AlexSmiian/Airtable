@@ -38,7 +38,7 @@ services:
 
   frontend:
     build: ./frontend
-    command: npm run dev
+    command: npm run dev -- -H 0.0.0.0
     env_file:
       - .env.${ENV}
     volumes:

@@ -2,10 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "src/app.ts",
   "scripts": {
-    "start": "node seed.js && node index.js",
-    "dev": "node seed.js --live && nodemon index.js"
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/server.ts",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
