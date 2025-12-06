@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useRef, useCallback } from 'react';
+import React, {useRef, useCallback, useMemo} from 'react';
 import {
     useInfiniteQuery,
-    QueryFunctionContext,
-
     InfiniteData
 } from "@tanstack/react-query";
 import {
@@ -16,12 +14,14 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { IRecord } from "@/features/Table/types/table";
 import { columns } from "@/features/Table/components/Columns";
 import { fetchTableData } from "@/features/Table/api/tableApi";
+import { TableUpdateProvider} from "@/features/Table/context/TableUpdateContext";
+
 import styles from "./table.module.scss";
 
 const PAGE_SIZE = 50;
 type PageParamType = number;
 
-export default function Index() {
+function TableContent() {
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -32,25 +32,23 @@ export default function Index() {
         hasNextPage,
         error,
     } = useInfiniteQuery<IRecord[], Error, InfiniteData<IRecord[]>, string[], PageParamType>({
-
         queryKey: ['tableData'],
-
-        queryFn: ({ pageParam = 0 }: QueryFunctionContext<string[], PageParamType>) =>
-            fetchTableData(pageParam, PAGE_SIZE),
-
-        getNextPageParam: (lastPage, allPages) => {
-            if (lastPage.length < PAGE_SIZE) return undefined;
-            return allPages.length * PAGE_SIZE;
-        },
+        queryFn: ({ pageParam = 0 }) => fetchTableData(pageParam, PAGE_SIZE),
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.length < PAGE_SIZE ? undefined : allPages.length * PAGE_SIZE,
         initialPageParam: 0,
     });
 
-    const tableData = data?.pages.flat() ?? [];
+    // ВАЖЛИВО: Мемоїзуємо tableData
+    const tableData = useMemo(() => data?.pages.flat() ?? [], [data?.pages]);
 
     const table = useReactTable<IRecord>({
         data: tableData,
         columns: columns,
         getCoreRowModel: getCoreRowModel(),
+        // КРИТИЧНО: Вимикаємо автоматичне оновлення state
+        enableRowSelection: false,
+        enableColumnResizing: false,
     });
 
     const rowCount = table.getRowCount();
@@ -80,7 +78,6 @@ export default function Index() {
             fetchNextPage();
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
 
     if (isFetching && !tableData.length) {
         return (
@@ -184,7 +181,6 @@ export default function Index() {
                         );
                     })}
                     {isFetchingNextPage && (
-
                         <div
                             className={styles.loadingMore}
                             style={{
@@ -199,5 +195,13 @@ export default function Index() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function Index() {
+    return (
+        <TableUpdateProvider>
+            <TableContent />
+        </TableUpdateProvider>
     );
 }

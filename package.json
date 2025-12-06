@@ -4,6 +4,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "classnames": "^2.5.1",
     "sass": "^1.94.2"
   }
 }

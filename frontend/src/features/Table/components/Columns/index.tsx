@@ -1,17 +1,17 @@
 import React from 'react';
 import { ColumnDef, createColumnHelper } from "@tanstack/table-core";
 import { IRecord } from "@/features/Table/types/table";
-import RenderTextCell from "../cells/RenderTextCell";
 import {RenderSelectCell} from "@/features/Table/components/cells/RenderSelectCell";
 import {RenderNumberCell} from "@/features/Table/components/cells/RenderNumberCell";
 import {RenderBooleanCell} from "@/features/Table/components/cells/RenderBooleanCell";
 import {RenderArrayCell} from "@/features/Table/components/cells/RenderArrayCell";
 import {RenderDateCell} from "@/features/Table/components/cells/RenderDateCell";
 import {RenderMetaCell} from "@/features/Table/components/cells/RenderMetaCell";
-
+import EditableCell from "@/features/Table/components/cells/EditableCell";
 
 const columnHelper = createColumnHelper<IRecord>();
 
+// Статичні колонки
 export const columns: ColumnDef<IRecord, any>[] = [
     columnHelper.accessor("id", {
         id: 'id',
@@ -28,28 +28,52 @@ export const columns: ColumnDef<IRecord, any>[] = [
     columnHelper.accessor('title', {
         id: 'title',
         header: () => "Title",
-        cell: info => <RenderTextCell text={info.getValue()} />,
+        cell: info => (
+            <EditableCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="title"
+            />
+        ),
         enableSorting: true,
     }),
 
     columnHelper.accessor('firstnames', {
         id: 'firstnames',
         header: () => "First Name",
-        cell: info => <RenderTextCell text={info.getValue()} />,
+        cell: info => (
+            <EditableCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="firstnames"
+            />
+        ),
         enableSorting: true,
     }),
 
     columnHelper.accessor('lastnames', {
         id: 'lastnames',
         header: () => "Last Name",
-        cell: info => <RenderTextCell text={info.getValue()} />,
+        cell: info => (
+            <EditableCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="lastnames"
+            />
+        ),
         enableSorting: true,
     }),
 
     columnHelper.accessor('description', {
         id: 'description',
         header: () => "Description",
-        cell: info => <RenderTextCell text={info.getValue()} />,
+        cell: info => (
+            <EditableCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="description"
+            />
+        ),
         enableSorting: true,
     }),
 
@@ -232,7 +256,13 @@ export const columns: ColumnDef<IRecord, any>[] = [
     columnHelper.accessor('comment', {
         id: 'comment',
         header: () => "Comment",
-        cell: info => <RenderTextCell text={info.getValue()} />,
+        cell: info => (
+            <EditableCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="comment"
+            />
+        ),
         enableSorting: false,
     }),
 
