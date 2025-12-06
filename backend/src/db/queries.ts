@@ -61,12 +61,10 @@ export class RecordQueries {
         ];
     }
 
-    // Отримуємо список всіх полів з колонок
     private static getAllFields(): string[] {
         return this.getColums().map(col => col.field);
     }
 
-    // Отримуємо список полів, які можна сортувати
     private static getSortableFields(): string[] {
         const columns = this.getColums();
         return columns
@@ -77,11 +75,9 @@ export class RecordQueries {
     static async getRecords(params: PaginationParams): Promise<{ records: Record[], total: number }> {
         const {limit, offset, sortBy = "id", sortOrder = 'asc'} = params;
 
-        // Динамічно отримуємо список полів для SELECT з getColumns()
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
 
-        // Динамічно отримуємо дозволені поля для сортування
         const allowedSortFields = this.getSortableFields();
         const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'id';
         const safeSortOrder = sortOrder === 'desc' ? 'DESC' : 'ASC';
@@ -103,7 +99,6 @@ export class RecordQueries {
         }
     }
 
-    // Отримуємо список полів, які можна редагувати
     private static getEditableFields(): string[] {
         return this.getColums()
             .filter(col => col.editable)
@@ -111,14 +106,12 @@ export class RecordQueries {
     }
 
     static async updateRecordField(recordId: number, field: string, value: any): Promise<Record> {
-        // Динамічно отримуємо дозволені поля для оновлення
         const allowedFields = this.getEditableFields();
 
         if (!allowedFields.includes(field)) {
             throw new Error(`Field ${field} is not allowed to be updated`);
         }
 
-        // Для JSONB полів використовуємо спеціальний синтаксис
         const columns = this.getColums();
         const columnConfig = columns.find(col => col.field === field);
 
@@ -127,7 +120,6 @@ export class RecordQueries {
             queryValue = JSON.stringify(value);
         }
 
-        // Динамічно отримуємо всі поля для RETURNING
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
 
@@ -147,7 +139,6 @@ export class RecordQueries {
         return result.rows[0];
     }
 
-    // Додатковий метод для отримання одного запису з усіма полями
     static async getRecordById(recordId: number): Promise<Record | null> {
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
@@ -162,7 +153,6 @@ export class RecordQueries {
         return result.rows.length > 0 ? result.rows[0] : null;
     }
 
-    // Метод для валідації даних перед вставкою/оновленням
     static validateFieldValue(field: string, value: any): { valid: boolean; error?: string } {
         const columns = this.getColums();
         const columnConfig = columns.find(col => col.field === field);
@@ -171,7 +161,6 @@ export class RecordQueries {
             return { valid: false, error: `Field ${field} does not exist` };
         }
 
-        // Перевірка типу
         switch (columnConfig.type) {
             case 'number':
                 if (typeof value !== 'number' && isNaN(Number(value))) {
