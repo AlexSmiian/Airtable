@@ -11,17 +11,23 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d airtable"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   seed:
     build: ./backend
     command: node seed.js
-    depends_on:
-      - db
     env_file:
       - .env.${ENV}
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
 
   backend:
     build: ./backend
@@ -32,7 +38,8 @@ services:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "5000:5000"
 

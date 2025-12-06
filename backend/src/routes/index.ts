@@ -1,11 +1,18 @@
 import {Router} from "express";
+import {RecordController} from "../controllers/recordController.ts";
 
 
 const router = Router();
 
-
-router.get('/hello', (req, res) => {
-    res.json({ message: 'Hello Hello from backend!' });
+router.get('/health', (req, res) => {
+    res.json({
+        status: 200,
+        timestamp: new Date().toISOString(),
+        service: 'GuruApps Table API'
+    });
 });
+
+router.get('/records', RecordController.getRecords);
+router.get('/records/:id/field', RecordController.updateField);
 
 export default router;

@@ -1,117 +1,188 @@
+// backend/seed.js
 import pkg from 'pg';
 const { Pool } = pkg;
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+dotenv.config({ path: path.resolve(__dirname, '../', envFile) });
 
 const pool = new Pool({
-    user: 'postgres',
-    host: 'db',
-    database: 'airtable',
-    password: 'postgres',
-    port: 5432,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+    host: process.env.PG_HOST,
+    port: Number(process.env.PG_PORT || 5432),
 });
 
-const BATCH_SIZE = 500;
-const TOTAL_RECORDS = 51000;
+const firstNames = ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa', 'Mark', 'Anna'];
+const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson'];
+const statuses = ['Active', 'Pending', 'Completed', 'Cancelled', 'On Hold'];
+const categories = ['Marketing', 'Sales', 'Development', 'Design', 'Support'];
+const priorities = ['Low', 'Medium', 'High', 'Critical'];
 
-function getRandomElement(arr) {
+function randomItem(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function generateRecord() {
-    return {
-        title: Math.random().toString(36).substring(2, 12),
-        description: Math.random().toString(36).substring(2, 20),
-        category: getRandomElement(['finance','education','marketing','games','health','travel']),
-        status: getRandomElement(['active','inactive','pending']),
-        amount: Math.floor(Math.random() * 10000),
-        quantity: Math.floor(Math.random() * 500),
-        price: (Math.random() * 500).toFixed(2),
-        rate: Math.random(),
-        is_active: Math.random() > 0.5,
-        created_at: new Date(new Date().getTime() - Math.random() * 100 * 24*60*60*1000),
-        updated_at: new Date(new Date().getTime() - Math.random() * 50 * 24*60*60*1000),
-        tags: JSON.stringify([
-            Math.random().toString(36).substring(2, 8),
-            Math.random().toString(36).substring(2, 8),
-            Math.random().toString(36).substring(2, 8)
-        ]),
-        attributes: JSON.stringify({
-            color: getRandomElement(['red','green','blue','black','white']),
-            size: Math.floor(Math.random() * 50),
-            weight: +(Math.random() * 10).toFixed(2)
-        }),
-        level: Math.floor(Math.random() * 5),
-        priority: Math.floor(Math.random() * 3), // замість 'low/medium/high', використовується int
-        code: Math.random().toString(36).substring(2, 12),
-        group_id: Math.floor(Math.random() * 1000),
-        meta: JSON.stringify({
-            source: getRandomElement(['system','user','import']),
-            verified: Math.random() > 0.5
-        }),
-        comment: Math.random().toString(36).substring(2, 15)
-    };
-}
-
-async function waitForPostgres() {
-    while (true) {
-        try {
-            await pool.query('SELECT 1');
-            console.log('Postgres is ready!');
-            break;
-        } catch {
-            console.log('Waiting for Postgres...');
-            await new Promise(r => setTimeout(r, 1000));
-        }
-    }
+function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 async function seed() {
-    await waitForPostgres();
+    const client = await pool.connect();
 
-    for (let i = 0; i < TOTAL_RECORDS; i += BATCH_SIZE) {
-        const records = Array.from({ length: BATCH_SIZE }, generateRecord);
+    try {
+        console.log('🌱 Starting database seed...');
 
-        const values = [];
-        const placeholders = records.map((r, idx) => {
-            const offset = idx * 19; // кількість колонок
-            values.push(
-                r.title,
-                r.description,
-                r.category,
-                r.status,
-                r.amount,
-                r.quantity,
-                r.price,
-                r.rate,
-                r.is_active,
-                r.created_at,
-                r.updated_at,
-                r.tags,        // JSON рядок
-                r.attributes,  // JSON рядок
-                r.level,
-                r.priority,
-                r.code,
-                r.group_id,
-                r.meta,        // JSON рядок
-                r.comment
-            );
-            const params = Array.from({ length: 19 }, (_, j) => `$${offset + j + 1}`);
-            return `(${params.join(',')})`;
-        });
+        await client.query('BEGIN');
 
-        const query = `
-            INSERT INTO records (
-                title, description, category, status, amount, quantity, price, rate,
-                is_active, created_at, updated_at, tags, attributes, level, priority,
-                code, group_id, meta, comment
-            ) VALUES ${placeholders.join(',')}
-        `;
+        const countResult = await client.query('SELECT COUNT(*) FROM records');
+        const existingCount = parseInt(countResult.rows[0].count);
 
-        await pool.query(query, values);
-        console.log(`Inserted ${Math.min(i + BATCH_SIZE, TOTAL_RECORDS)} / ${TOTAL_RECORDS}`);
+        if (existingCount > 0) {
+            console.log(`⚠️  Database already has ${existingCount.toLocaleString()} records`);
+            console.log('Skipping seed.');
+            await client.query('ROLLBACK');
+            return;
+        }
+
+        const TOTAL_RECORDS = 50000;
+        const BATCH_SIZE = 100; // Зменшуємо розмір батча для надійності
+        console.log(`📝 Creating ${TOTAL_RECORDS.toLocaleString()} records...`);
+
+        for (let i = 0; i < TOTAL_RECORDS; i += BATCH_SIZE) {
+            const batchSize = Math.min(BATCH_SIZE, TOTAL_RECORDS - i);
+
+            // Генеруємо VALUES для одного батча
+            const valueRows = [];
+            for (let j = 0; j < batchSize; j++) {
+                const firstName = randomItem(firstNames);
+                const lastName = randomItem(lastNames);
+
+                const title = `${firstName} ${lastName}`;
+                const description = `Project ${i + j + 1}`;
+                const category = randomItem(categories);
+                const status = randomItem(statuses);
+                const amount = randomNumber(1000, 100000);
+                const quantity = randomNumber(1, 500);
+                const price = parseFloat((Math.random() * 500).toFixed(2));
+                const rate = parseFloat(Math.random().toFixed(4));
+                const isActive = Math.random() > 0.3;
+                const tags = JSON.stringify([
+                    randomItem(['urgent', 'review', 'approved']),
+                    randomItem(['backend', 'frontend', 'design'])
+                ]);
+                const attributes = JSON.stringify({
+                    color: randomItem(['red', 'green', 'blue']),
+                    size: randomNumber(10, 100),
+                    weight: parseFloat((Math.random() * 50).toFixed(2))
+                });
+                const level = randomNumber(0, 4);
+                const priority = randomNumber(0, 3);
+                const code = `PRJ-${randomNumber(1000, 9999)}`;
+                const groupId = randomNumber(1, 100);
+                const meta = JSON.stringify({
+                    source: randomItem(['system', 'user', 'import']),
+                    verified: Math.random() > 0.5
+                });
+                const comment = `Comment ${i + j + 1}`;
+
+                valueRows.push(
+                    `('${title.replace(/'/g, "''")}', ` +
+                    `'${description}', ` +
+                    `'${category}', ` +
+                    `'${status}', ` +
+                    `${amount}, ` +
+                    `${quantity}, ` +
+                    `${price}, ` +
+                    `${rate}, ` +
+                    `${isActive}, ` +
+                    `'${tags}'::jsonb, ` +
+                    `'${attributes}'::jsonb, ` +
+                    `${level}, ` +
+                    `${priority}, ` +
+                    `'${code}', ` +
+                    `${groupId}, ` +
+                    `'${meta}'::jsonb, ` +
+                    `'${comment}')`
+                );
+            }
+
+            const query = `
+        INSERT INTO records (
+          title, description, category, status, amount, quantity, price, rate,
+          is_active, tags, attributes, level, priority, code, group_id, meta, comment
+        ) VALUES ${valueRows.join(',\n')}
+      `;
+
+            await client.query(query);
+
+            const progress = i + batchSize;
+            if (progress % 5000 === 0 || progress === TOTAL_RECORDS) {
+                console.log(`  ⏳ Progress: ${progress.toLocaleString()} / ${TOTAL_RECORDS.toLocaleString()} records`);
+            }
+        }
+
+        await client.query('COMMIT');
+
+        const stats = await client.query(`
+      SELECT 
+        COUNT(*) as total,
+        COUNT(DISTINCT category) as categories,
+        COUNT(DISTINCT status) as statuses,
+        SUM(CASE WHEN is_active THEN 1 ELSE 0 END) as active_records
+      FROM records
+    `);
+
+        console.log(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Seed completed successfully!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Total Records:     ${parseInt(stats.rows[0].total).toLocaleString()}
+📁 Categories:        ${stats.rows[0].categories}
+📋 Statuses:          ${stats.rows[0].statuses}
+✓  Active Records:    ${parseInt(stats.rows[0].active_records).toLocaleString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    `);
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('❌ Seed failed:', error);
+        throw error;
+    } finally {
+        client.release();
+        await pool.end();
+        process.exit(0);
     }
-
-    await pool.end();
-    console.log('Seeding completed!');
 }
 
-seed().catch(err => console.error(err));
+async function waitForPostgres() {
+    const maxAttempts = 30;
+    let attempt = 0;
+
+    while (attempt < maxAttempts) {
+        try {
+            await pool.query('SELECT 1');
+            console.log('✅ PostgreSQL is ready');
+            return true;
+        } catch (err) {
+            attempt++;
+            console.log(`⏳ Waiting for PostgreSQL... (${attempt}/${maxAttempts})`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
+
+    throw new Error('PostgreSQL connection timeout');
+}
+
+waitForPostgres()
+    .then(() => seed())
+    .catch((error) => {
+        console.error('Fatal error:', error);
+        process.exit(1);
+    });

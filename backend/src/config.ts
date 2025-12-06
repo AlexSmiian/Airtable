@@ -1,12 +1,18 @@
+// backend/src/config.ts
 import dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Це потрібно для ES modules щоб отримати __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 dotenv.config({ path: path.resolve(__dirname, '../../', envFile) });
 
 export const PORT = process.env.PORT || 5000;
-export const PG_USER = process.env.POSTGRES_USER!;
-export const PG_PASSWORD = process.env.POSTGRES_PASSWORD!;
-export const PG_DB = process.env.POSTGRES_DB!;
-export const PG_HOST = process.env.PG_HOST!;
+export const PG_USER = process.env.POSTGRES_USER || 'postgres';
+export const PG_PASSWORD = process.env.POSTGRES_PASSWORD || 'postgres';
+export const PG_DB = process.env.POSTGRES_DB || 'airtable';
+export const PG_HOST = process.env.PG_HOST || 'db';
 export const PG_PORT = Number(process.env.PG_PORT || 5432);
