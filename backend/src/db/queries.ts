@@ -30,23 +30,53 @@ export class RecordQueries {
             {id: 'rate', field: 'rate', name: 'Rate', type: 'number', editable: true},
             {id: 'is_active', field: 'is_active', name: 'Active', type: 'boolean', editable: true},
             {id: 'level', field: 'level', name: 'Level', type: 'number', editable: true},
-            {id: 'priority', field: 'priority', name: 'Priority', type: 'number', editable: true},
+            {id: 'priority', field: 'priority', name: 'Priority', type: 'select', editable: true,},
             {id: 'code', field: 'code', name: 'Code', type: 'text', editable: true},
+            {
+                id: 'attributes',
+                field: 'attributes',
+                name: 'Attributes',
+                type: 'select',
+                editable: true,
+                options: ['size', 'color', 'weight', 'height', 'width', 'depth', 'material', 'brand', 'model', 'capacity', 'power', 'voltage', 'speed', 'temperature', 'length', 'diameter']
+            },
+            {
+                id: 'lastNames',
+                field: 'lastNames',
+                name: 'lastNames',
+                type: 'select',
+                editable: true,
+                options: ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson']
+            },
+            {
+                id: 'firstNames',
+                field: 'firstNames',
+                name: 'firstNames',
+                type: 'select',
+                editable: true,
+                options: ['John', 'Jane', 'Michael', 'Sarah', 'David', 'Emma', 'Chris', 'Lisa', 'Mark', 'Anna']
+            },
             {id: 'group_id', field: 'group_id', name: 'Group', type: 'number', editable: true},
             {id: 'comment', field: 'comment', name: 'Comment', type: 'text', editable: true},
+            {id: 'created_at', field: 'created_at', name: 'Create Date', type: 'date', editable: true},
+            {id: 'updated_at', field: 'updated_at', name: 'Update Date', type: 'date', editable: true},
+            {id: 'meta', field: 'meta', name: 'Meta', type: 'json', editable: true},
         ];
     }
 
     static async getRecords(params: PaginationParams): Promise<{ records: Record[], total: number }> {
-        const { limit, offset, sortBy = "id", sortOrder = 'asc' } = params;
+        const {limit, offset, sortBy = "id", sortOrder = 'asc'} = params;
 
         const allowedSortFiels = ['id', 'title', 'created_at', 'updated_at', 'amount', 'price'];
         const safeSortBy = allowedSortFiels.includes(sortBy) ? sortBy : 'id';
         const safeSortOrder = sortOrder === 'desc' ? 'DESC' : 'ASC';
 
-        const  [recordsResult, countResult] = await Promise.all([
+        const [recordsResult, countResult] = await Promise.all([
             pool.query(
-                `SELECT * FROM records ORDER BY ${safeSortBy} ${safeSortOrder} LIMIT $1 OFFSET $2`,
+                `SELECT *
+                 FROM records
+                 ORDER BY ${safeSortBy} ${safeSortOrder} LIMIT $1
+                 OFFSET $2`,
                 [limit, offset],
             ),
             pool.query('SELECT COUNT(*) FROM records')
@@ -61,13 +91,16 @@ export class RecordQueries {
     static async updateRecordField(recordId: number, field: string, value: any): Promise<Record> {
         const allowedFields = ['title', 'description', 'category', 'status', 'amount', 'quantity', 'price', 'rate', 'is_active', 'level', 'priority', 'code', 'group_id', 'comment'];
 
-        if(!allowedFields.includes(field)) {
-            throw  new Error(`Field ${field} is not allowed to be updated`);
+        if (!allowedFields.includes(field)) {
+            throw new Error(`Field ${field} is not allowed to be updated`);
         }
 
         const result = await pool.query(
-            `UPDATE records SET ${field} = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-            [value,recordId]
+            `UPDATE records
+             SET ${field}   = $1,
+                 updated_at = NOW()
+             WHERE id = $2 RETURNING *`,
+            [value, recordId]
         );
 
         if (result.rows.length === 0) {

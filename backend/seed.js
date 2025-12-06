@@ -24,6 +24,7 @@ const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Moore', 'Tay
 const statuses = ['Active', 'Pending', 'Completed', 'Cancelled', 'On Hold'];
 const categories = ['Marketing', 'Sales', 'Development', 'Design', 'Support'];
 const priorities = ['Low', 'Medium', 'High', 'Critical'];
+const attributesOptions = ['size', 'color', 'weight', 'height', 'width', 'depth', 'material', 'brand', 'model', 'capacity', 'power', 'voltage', 'speed', 'temperature', 'length', 'diameter'];
 
 function randomItem(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -52,7 +53,7 @@ async function seed() {
         }
 
         const TOTAL_RECORDS = 50000;
-        const BATCH_SIZE = 100; // Зменшуємо розмір батча для надійності
+        const BATCH_SIZE = 100;
         console.log(`📝 Creating ${TOTAL_RECORDS.toLocaleString()} records...`);
 
         for (let i = 0; i < TOTAL_RECORDS; i += BATCH_SIZE) {
@@ -66,7 +67,12 @@ async function seed() {
 
                 const title = `${firstName} ${lastName}`;
                 const description = `Project ${i + j + 1}`;
-                const category = randomItem(categories);
+                const category = JSON.stringify([
+                    randomItem(categories),
+                    randomItem(categories),
+                    randomItem(categories),
+                    randomItem(categories),
+                ]);
                 const status = randomItem(statuses);
                 const amount = randomNumber(1000, 100000);
                 const quantity = randomNumber(1, 500);
@@ -77,11 +83,12 @@ async function seed() {
                     randomItem(['urgent', 'review', 'approved']),
                     randomItem(['backend', 'frontend', 'design'])
                 ]);
-                const attributes = JSON.stringify({
-                    color: randomItem(['red', 'green', 'blue']),
-                    size: randomNumber(10, 100),
-                    weight: parseFloat((Math.random() * 50).toFixed(2))
-                });
+                const attributes = JSON.stringify([
+                    randomItem(attributesOptions),
+                    randomItem(attributesOptions),
+                    randomItem(attributesOptions),
+                    randomItem(attributesOptions),
+                ]);
                 const level = randomNumber(0, 4);
                 const priority = randomNumber(0, 3);
                 const code = `PRJ-${randomNumber(1000, 9999)}`;
@@ -95,7 +102,7 @@ async function seed() {
                 valueRows.push(
                     `('${title.replace(/'/g, "''")}', ` +
                     `'${description}', ` +
-                    `'${category}', ` +
+                    `'${category}'::jsonb, ` +
                     `'${status}', ` +
                     `${amount}, ` +
                     `${quantity}, ` +

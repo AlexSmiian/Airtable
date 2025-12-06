@@ -1,5 +1,5 @@
 export interface Record {
-    id: number;
+    id: string;
     title: string;
     description: string;
     category: string;
@@ -12,20 +12,24 @@ export interface Record {
     created_at: Date;
     updated_at: Date;
     tags: string[];
-    attributes: {
-        color: string;
-        size: number;
-        weight: number;
-    };
+    attributes: Attribute[];
     level: number;
     priority: number;
     code: string;
     group_id: number;
+    lastNames: string;
+    firstNames: string;
     meta: {
         source: string;
         verified: boolean;
     };
     comment: string;
+}
+
+export interface Attribute {
+    key: 'color' | 'size' | 'weight';
+    value: string | number;
+    type: 'text' | 'number';
 }
 
 export interface Column {
@@ -70,14 +74,14 @@ export interface WSMessage {
 
 
 export interface FieldUpdatePayload {
-    recordId: number;
+    recordId: string;
     field: keyof Record;
     value: any;
     userId?: string;
 }
 
 export interface RecordUpdatePayload {
-    recordId: number;
+    recordId: string;
     updates: Partial<Record>;
     userId?: string;
 }
