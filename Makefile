@@ -4,6 +4,9 @@
 up:
 	ENV=local docker-compose up
 
+no-cache-build:
+	ENV=local docker-compose build   --no-cache
+
 scale-2:
 	ENV=local docker-compose up --scale backend=2
 

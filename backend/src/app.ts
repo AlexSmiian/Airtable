@@ -26,7 +26,7 @@ app.use('/api', routes);
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
     res.json({
-        message: 'GuruApps Table API',
+        message: 'GuruApps Index API',
         version: '1.0.0',
         endpoints: {
             health: '/api/health',

@@ -7,6 +7,8 @@ DROP TABLE IF EXISTS records CASCADE;
 CREATE TABLE records (
                          id SERIAL PRIMARY KEY,
                          title TEXT,
+                         firstNames TEXT,
+                         lastNames TEXT,
                          description TEXT,
                          category JSONB,
                          status TEXT,

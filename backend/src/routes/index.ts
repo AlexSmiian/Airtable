@@ -8,7 +8,7 @@ router.get('/health', (req, res) => {
     res.json({
         status: 200,
         timestamp: new Date().toISOString(),
-        service: 'GuruApps Table API'
+        service: 'GuruApps Index API'
     });
 });
 

@@ -17,8 +17,8 @@ export type IRecord = {
     priority: number;
     code: string;
     group_id: number;
-    firstNames: string;
-    lastNames: string;
+    firstnames: string;
+    lastnames: string;
     meta: {
         source: string;
         verified: boolean;

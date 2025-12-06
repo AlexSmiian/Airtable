@@ -17,8 +17,8 @@ export interface Record {
     priority: number;
     code: string;
     group_id: number;
-    lastNames: string;
-    firstNames: string;
+    lastnames: string;
+    firstnames: string;
     meta: {
         source: string;
         verified: boolean;
