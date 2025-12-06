@@ -1,9 +1,9 @@
 'use client';
 
-import React, {useRef, useCallback, useMemo} from 'react';
+import React, {useRef, useCallback, useMemo, useEffect} from 'react';
 import {
     useInfiniteQuery,
-    InfiniteData
+    InfiniteData, useQueryClient
 } from "@tanstack/react-query";
 import {
     useReactTable,
@@ -14,7 +14,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { IRecord } from "@/features/Table/types/table";
 import { columns } from "@/features/Table/components/Columns";
 import { fetchTableData } from "@/features/Table/api/tableApi";
-import { TableUpdateProvider} from "@/features/Table/context/TableUpdateContext";
+import {TableUpdateProvider, useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 
 import styles from "./table.module.scss";
 
@@ -38,15 +38,46 @@ function TableContent() {
             lastPage.length < PAGE_SIZE ? undefined : allPages.length * PAGE_SIZE,
         initialPageParam: 0,
     });
+    const { lastMessage } = useTableUpdate();
+    const queryClient = useQueryClient();
 
-    // ВАЖЛИВО: Мемоїзуємо tableData
+    useEffect(() => {
+        if (!lastMessage) return;
+
+        if (lastMessage.type === 'FIELD_UPDATED') {
+            const rawRecordId = lastMessage.payload.record?.id ?? lastMessage.payload.id;
+            // ✅ Приводимо ID до рядка, щоб забезпечити коректне порівняння
+            const recordIdString = String(rawRecordId);
+
+            const field = lastMessage.payload.field;
+            const value = lastMessage.payload.value;
+
+            console.log('Updating record id (stringified):', recordIdString, 'field:', field, 'value:', value);
+
+            queryClient.setQueryData<InfiniteData<IRecord[]>>(['tableData'], (oldData) => {
+                if (!oldData) return oldData;
+
+                const newPages = oldData.pages.map(page =>
+                    page.map(r =>
+                        String(r.id) === recordIdString // ✅ Порівнюємо рядки
+                            ? { ...r, [field]: value }
+                            : r
+                    )
+                );
+
+                // Якщо хоч один рядок в newPages відрізняється від oldData.pages, re-render відбудеться
+                return { ...oldData, pages: newPages };
+            });
+        }
+    }, [lastMessage, queryClient]);
+
+
     const tableData = useMemo(() => data?.pages.flat() ?? [], [data?.pages]);
 
     const table = useReactTable<IRecord>({
         data: tableData,
         columns: columns,
         getCoreRowModel: getCoreRowModel(),
-        // КРИТИЧНО: Вимикаємо автоматичне оновлення state
         enableRowSelection: false,
         enableColumnResizing: false,
     });

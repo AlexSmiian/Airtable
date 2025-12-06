@@ -1,4 +1,6 @@
-import { useState, useRef, memo } from "react";
+// EditableCell.tsx
+
+import React, { useState, useRef, memo, useEffect } from "react";
 import cln from "classnames";
 import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableCell.module.scss";
@@ -20,6 +22,17 @@ function EditableCell({
     const [value, setValue] = useState(initialValue || "");
     const [isEditing, setIsEditing] = useState(false);
     const originalValue = useRef(initialValue);
+
+    // ✅ КЛЮЧОВЕ ОНОВЛЕННЯ: Синхронізація внутрішнього стану з пропсом.
+    // Це забезпечує відображення нових даних, отриманих від WebSockets.
+    useEffect(() => {
+        const newValue = initialValue || "";
+        if (value !== newValue) {
+            setValue(newValue);
+            originalValue.current = newValue;
+        }
+    }, [initialValue]);
+
 
     if (!isEditing) {
         // Режим перегляду - простий div
@@ -55,6 +68,7 @@ function EditableCell({
                         sendUpdate(recordId, field, value);
                     }
                 } else if (e.key === "Escape") {
+                    // 💡 Важливо: використовуємо значення з useRef, яке оновлюється через useEffect
                     setValue(originalValue.current || "");
                     setIsEditing(false);
                 }
@@ -64,7 +78,8 @@ function EditableCell({
     );
 }
 
-// Мемоїзація для запобігання зайвих рендерів
+// Мемоізація залишається, оскільки тепер вона викликатиме перерендер лише при зміні initialValue,
+// і useEffect коректно оновлюватиме внутрішній стан.
 export default memo(EditableCell, (prev, next) => {
     return prev.initialValue === next.initialValue &&
         prev.recordId === next.recordId &&

@@ -74,14 +74,14 @@ export interface WSMessage {
 
 
 export interface FieldUpdatePayload {
-    recordId: string;
+    recordId: number;
     field: keyof Record;
     value: any;
     userId?: string;
 }
 
 export interface RecordUpdatePayload {
-    recordId: string;
+    recordId: number;
     updates: Partial<Record>;
     userId?: string;
 }

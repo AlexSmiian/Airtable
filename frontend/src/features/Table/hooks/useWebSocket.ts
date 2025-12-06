@@ -73,7 +73,7 @@ export function useWebSocket(url: string) {
             console.error("Помилка відправки:", error);
             return false;
         }
-    }, []); // Без залежностей - функція стабільна
+    }, []);
 
     return {
         isConnected,
