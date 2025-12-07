@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "classnames": "^2.5.1",
+    "lucide-react": "^0.556.0",
     "sass": "^1.94.2"
   }
 }

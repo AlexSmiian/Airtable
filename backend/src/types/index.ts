@@ -10,28 +10,30 @@ export interface Record {
     description: string;
     category: string[];
     primary_category: string | null;
-    status: string;
+    status: string[];
+    primary_status: string | null;
     amount: number;
     quantity: number;
     price: number;
     rate: number;
-    is_active: boolean;
+    is_active: string[];
+    primary_is_active: string | null;
     created_at: Date;
     updated_at: Date;
     tags: string[];
     primary_tag: string | null;
     attributes: Attribute[];
     primary_attribute: string | null;
-    level: number;
-    priority: number;
+    level: string[];
+    primary_level: string | null;
+    priority: string[];
+    primary_priority: string | null;
     code: string;
     group_id: number;
-    lastnames: string;
-    firstnames: string;
-    meta: {
-        source: string;
-        verified: boolean;
-    };
+    last_names: string;
+    first_names: string;
+    meta: string[];
+    primary_meta: string | null;
     comment: string;
 }
 
@@ -65,28 +67,5 @@ export interface PaginationParams {
 export enum WSMessageType {
     FIELD_UPDATE = 'FIELD_UPDATE',
     FIELD_UPDATED = 'FIELD_UPDATED',
-    RECORD_UPDATE = 'RECORD_UPDATE',
-    RECORD_UPDATED = 'RECORD_UPDATED',
     RECORD_UPDATE_ERROR = 'RECORD_UPDATE_ERROR',
-    SUBSCRIBE = 'SUBSCRIBE',
-    CONNECTED = 'CONNECTED',
-}
-
-export interface WSMessage {
-    type: WSMessageType | string;
-    payload: any;
-}
-
-
-export interface FieldUpdatePayload {
-    recordId: number;
-    field: RecordKeys;
-    value: any;
-    userId?: string;
-}
-
-export interface RecordUpdatePayload {
-    recordId: number;
-    updates: Partial<Record>;
-    userId?: string;
 }

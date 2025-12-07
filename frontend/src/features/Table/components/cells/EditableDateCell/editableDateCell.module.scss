@@ -1,0 +1,58 @@
+.viewMode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+  min-height: 36px;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+
+  .icon {
+    color: #6b7280;
+    flex-shrink: 0;
+  }
+
+  .dateText {
+    font-size: 14px;
+    color: #374151;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.editWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.editMode {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease;
+  font-variant-numeric: tabular-nums;
+
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+}

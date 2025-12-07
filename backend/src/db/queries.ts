@@ -7,6 +7,15 @@ export class RecordQueries {
             {id: 'id', field: 'id', name: 'ID', type: 'number', editable: false},
             {id: 'title', field: 'title', name: 'Title', type: 'text', editable: true},
             {id: 'description', field: 'description', name: 'Description', type: 'text', editable: true},
+            {id: 'group_id', field: 'group_id', name: 'Group', type: 'number', editable: true},
+            {id: 'comment', field: 'comment', name: 'Comment', type: 'text', editable: true},
+            {id: 'created_at', field: 'created_at', name: 'Create Date', type: 'date', editable: true},
+            {id: 'updated_at', field: 'updated_at', name: 'Update Date', type: 'date', editable: true},
+            {id: 'amount', field: 'amount', name: 'Amount', type: 'number', editable: true},
+            {id: 'quantity', field: 'quantity', name: 'Quantity', type: 'number', editable: true},
+            {id: 'price', field: 'price', name: 'Price', type: 'number', editable: true},
+            {id: 'rate', field: 'rate', name: 'Rate', type: 'number', editable: true},
+            {id: 'code', field: 'code', name: 'Code', type: 'text', editable: true},
             {
                 id: 'category_list',
                 field: 'category',
@@ -38,21 +47,65 @@ export class RecordQueries {
                 options: ['Marketing', 'Sales', 'Development', 'Design', 'Support']
             },
             {
-                id: 'status',
+                id: 'status_list',
                 field: 'status',
+                name: 'Status (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_status',
+                field: 'primary_status',
                 name: 'Status',
                 type: 'select',
                 editable: true,
                 options: ['Active', 'Pending', 'Completed', 'Cancelled', 'On Hold']
             },
-            {id: 'amount', field: 'amount', name: 'Amount', type: 'number', editable: true},
-            {id: 'quantity', field: 'quantity', name: 'Quantity', type: 'number', editable: true},
-            {id: 'price', field: 'price', name: 'Price', type: 'number', editable: true},
-            {id: 'rate', field: 'rate', name: 'Rate', type: 'number', editable: true},
-            {id: 'is_active', field: 'is_active', name: 'Active', type: 'boolean', editable: true},
-            {id: 'level', field: 'level', name: 'Level', type: 'number', editable: true},
-            {id: 'priority', field: 'priority', name: 'Priority', type: 'select', editable: true},
-            {id: 'code', field: 'code', name: 'Code', type: 'text', editable: true},
+            {
+                id: 'is_active_list',
+                field: 'is_active',
+                name: 'Active (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_is_active',
+                field: 'primary_is_active',
+                name: 'Active',
+                type: 'select',
+                editable: true,
+                options: ['true', 'false', 'canceled']
+            },
+            {
+                id: 'level_list',
+                field: 'level',
+                name: 'Level (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_level',
+                field: 'primary_level',
+                name: 'Level',
+                type: 'select',
+                editable: true,
+                options: ['1', '2', '3', '4', '5', '6', '7', '8']
+            },
+            {
+                id: 'priority_list',
+                field: 'priority',
+                name: 'Priority (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_priority',
+                field: 'primary_priority',
+                name: 'Priority',
+                type: 'select',
+                editable: true,
+                options: ['Low', 'Medium', 'High', 'Critical']
+            },
             {
                 id: 'attributes_list',
                 field: 'attributes',
@@ -69,29 +122,38 @@ export class RecordQueries {
                 options: ['size', 'color', 'weight', 'height', 'width', 'depth', 'material', 'brand', 'model', 'capacity', 'power', 'voltage', 'speed', 'temperature', 'length', 'diameter']
             },
             {
-                id: 'lastnames',
-                field: 'lastnames',
+                id: 'last_names',
+                field: 'last_names',
                 name: 'Last Names',
                 type: 'text',
                 editable: true,
             },
             {
-                id: 'firstnames',
-                field: 'firstnames',
+                id: 'first_names',
+                field: 'first_names',
                 name: 'First Names',
                 type: 'text',
                 editable: true,
             },
-            {id: 'group_id', field: 'group_id', name: 'Group', type: 'number', editable: true},
-            {id: 'comment', field: 'comment', name: 'Comment', type: 'text', editable: true},
-            {id: 'created_at', field: 'created_at', name: 'Create Date', type: 'date', editable: true},
-            {id: 'updated_at', field: 'updated_at', name: 'Update Date', type: 'date', editable: true},
-            {id: 'meta', field: 'meta', name: 'Meta', type: 'json', editable: true},
+            {
+                id: 'meta_list',
+                field: 'meta',
+                name: 'Meta (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_meta',
+                field: 'primary_meta',
+                name: 'Meta',
+                type: 'select',
+                editable: true,
+                options: ['system', 'user', 'import']
+            },
         ];
     }
 
     private static getAllFields(): string[] {
-        // Усуваємо дублікати, хоча у вашому поточному списку їх немає, це хороша практика.
         const uniqueFields = Array.from(new Set(this.getColums().map(col => col.field)));
         return uniqueFields;
     }
@@ -107,7 +169,7 @@ export class RecordQueries {
         const {limit, offset, sortBy = "id", sortOrder = 'asc'} = params;
 
         const allFields = this.getAllFields();
-        const selectFields = allFields.join(', '); // Включаємо всі колонки DB, щоб клієнт отримав повний об'єкт Record
+        const selectFields = allFields.join(', ');
 
         const allowedSortFields = this.getSortableFields();
         const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'id';
@@ -148,13 +210,9 @@ export class RecordQueries {
 
         let queryValue = value;
 
-        // Обробка JSONB полів, які дозволені для редагування (наприклад, 'meta')
         if (columnConfig?.type === 'json' && typeof value === 'object' && value !== null) {
             queryValue = JSON.stringify(value);
         }
-        // Примітка: Поля 'primary_category', 'primary_tag', 'primary_attribute' мають type: 'select',
-        // що відповідає TEXT у DB. Драйвер PG обробить string або null коректно,
-        // тому додаткової JSON-серіалізації тут не потрібно.
 
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
@@ -175,51 +233,4 @@ export class RecordQueries {
         return result.rows[0];
     }
 
-    static async getRecordById(recordId: number): Promise<Record | null> {
-        const allFields = this.getAllFields();
-        const selectFields = allFields.join(', ');
-
-        const result = await pool.query(
-            `SELECT ${selectFields}
-             FROM records
-             WHERE id = $1`,
-            [recordId]
-        );
-
-        return result.rows.length > 0 ? result.rows[0] : null;
-    }
-
-    static validateFieldValue(field: string, value: any): { valid: boolean; error?: string } {
-        const columns = this.getColums();
-        const columnConfig = columns.find(col => col.field === field);
-
-        if (!columnConfig) {
-            return { valid: false, error: `Field ${field} does not exist` };
-        }
-
-        switch (columnConfig.type) {
-            case 'number':
-                if (typeof value !== 'number' && isNaN(Number(value))) {
-                    return { valid: false, error: `${field} must be a number` };
-                }
-                break;
-            case 'boolean':
-                if (typeof value !== 'boolean') {
-                    return { valid: false, error: `${field} must be a boolean` };
-                }
-                break;
-            case 'select':
-                if (columnConfig.options && !columnConfig.options.includes(value)) {
-                    if (value !== null && value !== '') {
-                        return {
-                            valid: false,
-                            error: `${field} must be one of: ${columnConfig.options.join(', ')}`
-                        };
-                    }
-                }
-                break;
-        }
-
-        return { valid: true };
-    }
 }

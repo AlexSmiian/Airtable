@@ -26,7 +26,10 @@ const statuses = ['Active', 'Pending', 'Completed', 'Cancelled', 'On Hold'];
 const categories = ['Marketing', 'Sales', 'Development', 'Design', 'Support'];
 const priorities = ['Low', 'Medium', 'High', 'Critical'];
 const fullTags = ['urgent', 'review', 'approved'];
+const levels = ['1', '2', '3', '4', '5', '6', '7', '8'];
 const attributesOptions = ['size', 'color', 'weight', 'height', 'width', 'depth', 'material', 'brand', 'model', 'capacity', 'power', 'voltage', 'speed', 'temperature', 'length', 'diameter'];
+const metaItems = ['system', 'user', 'import']
+const activeStatus = ['true', 'false', 'canceled'];
 
 function randomItem(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -66,33 +69,28 @@ async function seed() {
                 const lastName = randomItem(lastNames);
                 const title = `${firstName} ${lastName}`;
                 const description = `Project ${i + j + 1}`;
-
                 const category = JSON.stringify(categories);
                 const primaryCategory = randomItem(categories);
-
-                const status = randomItem(statuses);
+                const status = JSON.stringify(statuses);
+                const primaryStatus = randomItem(statuses);
                 const amount = randomNumber(1000, 100000);
                 const quantity = randomNumber(1, 500);
                 const price = parseFloat((Math.random() * 500).toFixed(2));
                 const rate = parseFloat(Math.random().toFixed(4));
-                const isActive = Math.random() > 0.3;
-
+                const isActive = JSON.stringify(activeStatus);
+                const primaryIsActive = randomItem(activeStatus);
                 const tags = JSON.stringify(fullTags);
                 const primaryTag = randomItem(fullTags);
-
                 const attributes = JSON.stringify(attributesOptions);
                 const primaryAttribute = randomItem(attributesOptions);
-
-                const level = randomNumber(0, 4);
-                const priority = randomNumber(0, 3);
+                const level = JSON.stringify(levels);
+                const primaryLevel = randomNumber(1, 8).toString();
+                const priority = JSON.stringify(priorities);
+                const primaryPriority = randomItem(priorities);
                 const code = `PRJ-${randomNumber(1000, 9999)}`;
                 const groupId = randomNumber(1, 100);
-
-                const meta = JSON.stringify({
-                    source: randomItem(['system', 'user', 'import']),
-                    verified: Math.random() > 0.5
-                });
-
+                const meta = JSON.stringify(metaItems);
+                const primaryMeta = randomItem(metaItems);
                 const comment = `Comment ${i + j + 1}`;
 
                 valueRows.push(
@@ -102,30 +100,35 @@ async function seed() {
                     `'${description}', ` +
                     `'${category}'::jsonb, ` +
                     `'${primaryCategory}', ` +
-                    `'${status}', ` +
+                    `'${status}'::jsonb, ` +
+                    `'${primaryStatus}', ` +
                     `${amount}, ` +
                     `${quantity}, ` +
                     `${price}, ` +
                     `${rate}, ` +
-                    `${isActive}, ` +
+                    `'${isActive}'::jsonb, ` +
+                    `'${primaryIsActive}', ` +
                     `'${tags}'::jsonb, ` +
-                    `'${primaryTag}', ` + // ✅ Додаємо primary_tag
+                    `'${primaryTag}', ` +
                     `'${attributes}'::jsonb, ` +
                     `'${primaryAttribute}', ` +
-                    `${level}, ` +
-                    `${priority}, ` +
+                    `'${level}'::jsonb, ` +
+                    `'${primaryLevel}', ` +
+                    `'${priority}'::jsonb, ` +
+                    `'${primaryPriority}', ` +
                     `'${code}', ` +
                     `${groupId}, ` +
                     `'${meta}'::jsonb, ` +
+                    `'${primaryMeta}', ` +
                     `'${comment}')`
                 );
             }
 
             const query = `
                 INSERT INTO records (
-                    title, firstNames, lastNames, description, category, primary_category, status,
-                    amount, quantity, price, rate, is_active, tags, primary_tag, attributes, primary_attribute,
-                    level, priority, code, group_id, meta, comment
+                    title, first_names, last_names, description, category, primary_category, status, primary_status,
+                    amount, quantity, price, rate, is_active, primary_is_active, tags, primary_tag, attributes, primary_attribute,
+                    level, primary_level, priority, primary_priority, code, group_id, meta, primary_meta, comment
                 ) VALUES
                     ${valueRows.join(',\n')}
             `;
@@ -146,8 +149,7 @@ async function seed() {
             SELECT
                 COUNT(*) as total,
                 COUNT(DISTINCT primary_category) as categories,
-                COUNT(DISTINCT status) as statuses,
-                SUM(CASE WHEN is_active THEN 1 ELSE 0 END) as active_records
+                COUNT(DISTINCT primary_status) as statuses
             FROM records
         `);
 
@@ -158,7 +160,6 @@ async function seed() {
 📊 Total Records: ${parseInt(stats.rows[0].total).toLocaleString()}
 📁 Categories: ${stats.rows[0].categories}
 📋 Statuses: ${stats.rows[0].statuses}
-✓  Active Records: ${parseInt(stats.rows[0].active_records).toLocaleString()}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         `);
 

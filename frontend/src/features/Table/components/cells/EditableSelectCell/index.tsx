@@ -14,7 +14,7 @@ interface SelectCellProps {
     value: string | null | undefined;
     recordId: number;
     field: string;
-    variant?: 'status' | 'category' | 'priority' | 'tag' | 'attribute';
+    variant?: 'status' | 'category' | 'priority' | 'tag' | 'attribute' | 'level' | 'active';
 }
 
 const OPTIONS_MAP: Record<string, Option[]> = {
@@ -26,9 +26,9 @@ const OPTIONS_MAP: Record<string, Option[]> = {
         { label: 'On Hold', value: 'On Hold', colorClass: styles.bgGray },
     ],
     priority: [
-        { label: 'High', value: '3', colorClass: styles.bgRed },
-        { label: 'Medium', value: '2', colorClass: styles.bgYellow },
-        { label: 'Low', value: '1', colorClass: styles.bgGreen },
+        { label: 'High', value: 'High', colorClass: styles.bgRed },
+        { label: 'Medium', value: 'Medium', colorClass: styles.bgYellow },
+        { label: 'Low', value: 'Low', colorClass: styles.bgGreen },
     ],
     category: [
         { label: 'Design', value: 'Design', colorClass: styles.bgPurple },
@@ -46,7 +46,22 @@ const OPTIONS_MAP: Record<string, Option[]> = {
         { label: 'Size', value: 'size', colorClass: styles.bgGray },
         { label: 'Color', value: 'color', colorClass: styles.bgGray },
         { label: 'Weight', value: 'weight', colorClass: styles.bgGray },
-    ]
+    ],
+    level: [
+        { label: '1', value: '1', colorClass: styles.bgRed },
+        { label: '2', value: '2', colorClass: styles.bgYellow },
+        { label: '3', value: '3', colorClass: styles.bgGray },
+        { label: '4', value: '4', colorClass: styles.bgBlue },
+        { label: '5', value: '5', colorClass: styles.bgPurple },
+        { label: '6', value: '6', colorClass: styles.bgGreen },
+        { label: '7', value: '7', colorClass: styles.bgRed },
+        { label: '8', value: '8', colorClass: styles.bgYellow },
+    ],
+    active: [
+        { label: 'True', value: 'true', colorClass: styles.bgYellow },
+        { label: 'False', value: 'false', colorClass: styles.bgPurple },
+        { label: 'Canceled', value: 'canceled', colorClass: styles.bgRed },
+    ],
 };
 
 const EMPTY_OPTION_META: Option = { label: '— Видалити значення —', value: '', colorClass: styles.bgGray};
