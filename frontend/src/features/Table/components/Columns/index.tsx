@@ -1,7 +1,6 @@
 import React from 'react';
 import {ColumnDef, createColumnHelper} from "@tanstack/table-core";
 import {IRecord} from "@/features/Table/types/table";
-import {RenderDateCell} from "@/features/Table/components/Cells/RenderDateCell";
 import EditableCell from "@/features/Table/components/Cells/EditableCell";
 import EditableSelectCell from "@/features/Table/components/Cells/EditableSelectCell";
 import EditableNumberCell from "@/features/Table/components/Cells/EditableNumberCell/EditableNumberCell";
@@ -16,7 +15,7 @@ export const columns: ColumnDef<IRecord, any>[] = [
             id: 'id',
             header: () => "ID",
             cell: info => (
-                <div className="font-mono text-sm text-gray-900">
+                <div>
                     {info.getValue()}
                 </div>
             ),

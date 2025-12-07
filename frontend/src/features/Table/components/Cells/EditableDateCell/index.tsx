@@ -5,7 +5,6 @@ import cln from "classnames";
 import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableDateCell.module.scss";
 
-// SVG Calendar Icon Component
 const CalendarIcon = ({ className, size = 14 }: { className?: string; size?: number }) => (
     <svg
         width={size}
@@ -59,11 +58,9 @@ function EditableDateCell({
     useEffect(() => {
         if (isEditing && inputRef.current) {
             inputRef.current.focus();
-            // Відкриваємо нативний календар
             try {
                 inputRef.current.showPicker?.();
             } catch (e) {
-                // Якщо showPicker не підтримується, просто фокусуємо
                 console.log('showPicker not supported');
             }
         }
@@ -148,15 +145,12 @@ function EditableDateCell({
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        // Перевіряємо чи фокус не перейшов на календар
         const relatedTarget = e.relatedTarget as HTMLElement;
 
-        // Якщо це календар браузера, не закриваємо
         if (relatedTarget && relatedTarget.tagName === 'INPUT') {
             return;
         }
 
-        // Затримка щоб дати час на вибір дати в календарі
         blurTimeoutRef.current = setTimeout(() => {
             handleSave();
         }, 300);
@@ -213,14 +207,12 @@ function EditableDateCell({
                 value={value}
                 onChange={(e) => {
                     setValue(e.target.value);
-                    // Скасовуємо затримку при зміні значення
                     if (blurTimeoutRef.current) {
                         clearTimeout(blurTimeoutRef.current);
                     }
                 }}
                 onBlur={handleBlur}
                 onClick={() => {
-                    // Відкриваємо календар при кліку
                     if (inputRef.current) {
                         try {
                             inputRef.current.showPicker?.();

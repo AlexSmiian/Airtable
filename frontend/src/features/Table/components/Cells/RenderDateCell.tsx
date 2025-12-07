@@ -7,13 +7,13 @@ interface RenderDateCellProps {
 
 export function RenderDateCell({ date, format = 'date' }: RenderDateCellProps): JSX.Element {
     if (!date) {
-        return <span className="text-sm text-gray-400 italic">-</span>;
+        return <span>-</span>;
     }
 
     const dateObj = typeof date === 'string' ? new Date(date) : date;
 
     if (isNaN(dateObj.getTime())) {
-        return <span className="text-sm text-gray-400 italic">Invalid date</span>;
+        return <span>Invalid date</span>;
     }
 
     let formatted: string;
@@ -40,5 +40,5 @@ export function RenderDateCell({ date, format = 'date' }: RenderDateCellProps): 
             break;
     }
 
-    return <span className="text-sm text-gray-600">{formatted}</span>;
+    return <span>{formatted}</span>;
 }
