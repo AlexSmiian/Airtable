@@ -14,14 +14,14 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { IRecord } from "@/features/Table/types/table";
 import { columns } from "@/features/Table/components/Columns";
 import { fetchTableData } from "@/features/Table/api/tableApi";
-import {TableUpdateProvider, useTableUpdate} from "@/features/Table/context/TableUpdateContext";
+import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 
 import styles from "./table.module.scss";
 
 const PAGE_SIZE = 50;
 type PageParamType = number;
 
-function TableContent() {
+export default function TableContent() {
     const tableContainerRef = useRef<HTMLDivElement>(null);
 
     const {
@@ -224,13 +224,5 @@ function TableContent() {
                 </div>
             </div>
         </div>
-    );
-}
-
-export default function Index() {
-    return (
-        <TableUpdateProvider>
-            <TableContent />
-        </TableUpdateProvider>
     );
 }

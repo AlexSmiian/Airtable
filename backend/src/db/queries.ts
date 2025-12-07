@@ -10,7 +10,7 @@ export class RecordQueries {
             {id: 'group_id', field: 'group_id', name: 'Group', type: 'number', editable: true},
             {id: 'comment', field: 'comment', name: 'Comment', type: 'text', editable: true},
             {id: 'created_at', field: 'created_at', name: 'Create Date', type: 'date', editable: true},
-            {id: 'updated_at', field: 'updated_at', name: 'Update Date', type: 'date', editable: true},
+            {id: 'updated_at', field: 'updated_at', name: 'Update Date', type: 'date', editable: false},
             {id: 'amount', field: 'amount', name: 'Amount', type: 'number', editable: true},
             {id: 'quantity', field: 'quantity', name: 'Quantity', type: 'number', editable: true},
             {id: 'price', field: 'price', name: 'Price', type: 'number', editable: true},
@@ -217,14 +217,21 @@ export class RecordQueries {
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
 
-        const result = await pool.query(
-            `UPDATE records
-             SET ${field} = $1,
-                 updated_at = NOW()
-             WHERE id = $2
-                 RETURNING ${selectFields}`,
-            [queryValue, recordId]
-        );
+        // Оновлюємо updated_at тільки якщо це НЕ саме поле updated_at
+        const shouldUpdateTimestamp = field !== 'updated_at' && field !== 'created_at';
+
+        const updateQuery = shouldUpdateTimestamp
+            ? `UPDATE records
+               SET ${field} = $1,
+                   updated_at = NOW()
+               WHERE id = $2
+               RETURNING ${selectFields}`
+            : `UPDATE records
+               SET ${field} = $1
+               WHERE id = $2
+               RETURNING ${selectFields}`;
+
+        const result = await pool.query(updateQuery, [queryValue, recordId]);
 
         if (result.rows.length === 0) {
             throw new Error('Record not found');

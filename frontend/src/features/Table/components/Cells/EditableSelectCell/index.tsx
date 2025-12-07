@@ -1,4 +1,7 @@
+"use client";
+
 import React, {JSX, useState, useCallback, useMemo, useRef, useEffect, memo} from "react";
+import { createPortal } from "react-dom";
 import styles from "./editableSelectCell.module.scss";
 import cln from "classnames";
 import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
@@ -14,7 +17,7 @@ interface SelectCellProps {
     value: string | null | undefined;
     recordId: number;
     field: string;
-    variant?: 'status' | 'category' | 'priority' | 'tag' | 'attribute' | 'level' | 'active';
+    variant?: 'status' | 'category' | 'priority' | 'tag' | 'attribute' | 'level' | 'active' | 'meta';
 }
 
 const OPTIONS_MAP: Record<string, Option[]> = {
@@ -29,6 +32,7 @@ const OPTIONS_MAP: Record<string, Option[]> = {
         { label: 'High', value: 'High', colorClass: styles.bgRed },
         { label: 'Medium', value: 'Medium', colorClass: styles.bgYellow },
         { label: 'Low', value: 'Low', colorClass: styles.bgGreen },
+        { label: 'Critical', value: 'Critical', colorClass: styles.bgRed },
     ],
     category: [
         { label: 'Design', value: 'Design', colorClass: styles.bgPurple },
@@ -46,6 +50,19 @@ const OPTIONS_MAP: Record<string, Option[]> = {
         { label: 'Size', value: 'size', colorClass: styles.bgGray },
         { label: 'Color', value: 'color', colorClass: styles.bgGray },
         { label: 'Weight', value: 'weight', colorClass: styles.bgGray },
+        { label: 'Height', value: 'height', colorClass: styles.bgGray },
+        { label: 'Width', value: 'width', colorClass: styles.bgGray },
+        { label: 'Depth', value: 'depth', colorClass: styles.bgGray },
+        { label: 'Material', value: 'material', colorClass: styles.bgGray },
+        { label: 'Brand', value: 'brand', colorClass: styles.bgGray },
+        { label: 'Model', value: 'model', colorClass: styles.bgGray },
+        { label: 'Capacity', value: 'capacity', colorClass: styles.bgGray },
+        { label: 'Power', value: 'power', colorClass: styles.bgGray },
+        { label: 'Voltage', value: 'voltage', colorClass: styles.bgGray },
+        { label: 'Speed', value: 'speed', colorClass: styles.bgGray },
+        { label: 'Temperature', value: 'temperature', colorClass: styles.bgGray },
+        { label: 'Length', value: 'length', colorClass: styles.bgGray },
+        { label: 'Diameter', value: 'diameter', colorClass: styles.bgGray },
     ],
     level: [
         { label: '1', value: '1', colorClass: styles.bgRed },
@@ -58,9 +75,14 @@ const OPTIONS_MAP: Record<string, Option[]> = {
         { label: '8', value: '8', colorClass: styles.bgYellow },
     ],
     active: [
-        { label: 'True', value: 'true', colorClass: styles.bgYellow },
-        { label: 'False', value: 'false', colorClass: styles.bgPurple },
-        { label: 'Canceled', value: 'canceled', colorClass: styles.bgRed },
+        { label: 'True', value: 'true', colorClass: styles.bgGreen },
+        { label: 'False', value: 'false', colorClass: styles.bgRed },
+        { label: 'Canceled', value: 'canceled', colorClass: styles.bgGray },
+    ],
+    meta: [
+        { label: 'System', value: 'system', colorClass: styles.bgBlue },
+        { label: 'User', value: 'user', colorClass: styles.bgGreen },
+        { label: 'Import', value: 'import', colorClass: styles.bgYellow },
     ],
 };
 
@@ -90,6 +112,12 @@ function EditableSelectCell({
                             }: SelectCellProps): JSX.Element {
     const { sendUpdate } = useTableUpdate();
     const [isOpen, setIsOpen] = useState(false);
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const cachedValueFromProps = useMemo(() => {
         if (!initialValue) return null;
@@ -114,12 +142,47 @@ function EditableSelectCell({
 
 
     const displayRef = useRef<HTMLDivElement>(null);
-    useOutsideClick(displayRef, () => setIsOpen(false));
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useOutsideClick(containerRef, () => setIsOpen(false));
 
     const currentOption = useMemo(() => getOptionData(variant, displayValue), [variant, displayValue]);
 
-    const handleSelect = useCallback((newValue: string) => {
+    const updateDropdownPosition = useCallback(() => {
+        if (displayRef.current) {
+            const rect = displayRef.current.getBoundingClientRect();
+            const dropdownHeight = 300;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
 
+            let top = rect.bottom + 4;
+
+            if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+                top = rect.top - Math.min(dropdownHeight, spaceAbove) - 4;
+            }
+
+            setDropdownPosition({
+                top: top,
+                left: rect.left,
+                width: Math.max(rect.width, 150)
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isOpen) {
+            updateDropdownPosition();
+            window.addEventListener('scroll', updateDropdownPosition, true);
+            window.addEventListener('resize', updateDropdownPosition);
+
+            return () => {
+                window.removeEventListener('scroll', updateDropdownPosition, true);
+                window.removeEventListener('resize', updateDropdownPosition);
+            };
+        }
+    }, [isOpen, updateDropdownPosition]);
+
+    const handleSelect = useCallback((newValue: string) => {
         const updateValue = newValue === '' ? null : newValue;
         const currentLocalValue = displayValue;
 
@@ -129,28 +192,32 @@ function EditableSelectCell({
             setDisplayValue(updateValue);
             sendUpdate(recordId, field, updateValue);
         }
-
     }, [recordId, field, displayValue, sendUpdate]);
 
-
-    const Display = (
-        <span
-            className={cln(styles.selectDisplay, currentOption?.colorClass || styles.bgGray)}
-            onClick={() => setIsOpen(prev => !prev)}
-        >
-            {displayValue
-                ? displayValue
-                : <span className={styles.empty}>—</span>}
-        </span>
-    );
+    const handleToggle = useCallback(() => {
+        setIsOpen(prev => !prev);
+    }, []);
 
     return (
-        <div style={{position:'relative'}} ref={displayRef}>
-            <div className={styles.cellWrapper}>
-                {Display}
+        <>
+            <div className={styles.cellWrapper} ref={displayRef}>
+                <span
+                    className={cln(styles.selectDisplay, currentOption?.colorClass || styles.bgGray)}
+                    onClick={handleToggle}
+                >
+                    {displayValue || <span className={styles.empty}>—</span>}
+                </span>
             </div>
-            {isOpen && (
-                <div className={styles.dropdownContainer}>
+            {isOpen && mounted && createPortal(
+                <div
+                    ref={containerRef}
+                    className={styles.dropdownContainer}
+                    style={{
+                        top: `${dropdownPosition.top}px`,
+                        left: `${dropdownPosition.left}px`,
+                        width: `${dropdownPosition.width}px`,
+                    }}
+                >
                     {optionsWithEmpty.map((option) => (
                         <div
                             key={option.value || 'empty-reset'}
@@ -164,9 +231,10 @@ function EditableSelectCell({
                             {option.label}
                         </div>
                     ))}
-                </div>
+                </div>,
+                document.body
             )}
-        </div>
+        </>
     );
 }
 

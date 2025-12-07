@@ -1,13 +1,13 @@
 import React from 'react';
 import {ColumnDef, createColumnHelper} from "@tanstack/table-core";
 import {IRecord} from "@/features/Table/types/table";
-import {RenderDateCell} from "@/features/Table/components/cells/RenderDateCell";
-import EditableCell from "@/features/Table/components/cells/EditableCell";
-import EditableSelectCell from "@/features/Table/components/cells/EditableSelectCell";
-import EditableNumberCell from "@/features/Table/components/cells/EditableNumberCell/EditableNumberCell";
-import EditableDecimalCell from "@/features/Table/components/cells/EditableDecimalCell";
-import EditableRateCell from "@/features/Table/components/cells/EditableRateCell";
-import EditableDateCell from "@/features/Table/components/cells/EditableDateCell";
+import {RenderDateCell} from "@/features/Table/components/Cells/RenderDateCell";
+import EditableCell from "@/features/Table/components/Cells/EditableCell";
+import EditableSelectCell from "@/features/Table/components/Cells/EditableSelectCell";
+import EditableNumberCell from "@/features/Table/components/Cells/EditableNumberCell/EditableNumberCell";
+import EditableDecimalCell from "@/features/Table/components/Cells/EditableDecimalCell";
+import EditableRateCell from "@/features/Table/components/Cells/EditableRateCell";
+import EditableDateCell from "@/features/Table/components/Cells/EditableDateCell";
 
 const columnHelper = createColumnHelper<IRecord>();
 
@@ -57,7 +57,7 @@ export const columns: ColumnDef<IRecord, any>[] = [
                 <EditableCell
                     initialValue={info.getValue()}
                     recordId={info.row.original.id}
-                    field="lastnames"
+                    field="last_names"
                 />
             ),
             enableSorting: true,
@@ -327,6 +327,7 @@ export const columns: ColumnDef<IRecord, any>[] = [
                     recordId={info.row.original.id}
                     field="updated_at"
                     format="date"
+                    readOnly={true}
                 />
             ),
             enableSorting: true,

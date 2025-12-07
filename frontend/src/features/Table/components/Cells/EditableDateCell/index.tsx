@@ -31,6 +31,7 @@ interface EditableDateCellProps {
     field: string;
     format?: 'date' | 'datetime' | 'time';
     className?: string;
+    readOnly?: boolean;
 }
 
 function EditableDateCell({
@@ -38,7 +39,8 @@ function EditableDateCell({
                               recordId,
                               field,
                               format = 'date',
-                              className = ""
+                              className = "",
+                              readOnly = false
                           }: EditableDateCellProps) {
 
     const { sendUpdate } = useTableUpdate();
@@ -46,12 +48,34 @@ function EditableDateCell({
     const [value, setValue] = useState("");
     const originalValue = useRef("");
     const inputRef = useRef<HTMLInputElement>(null);
+    const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const formattedValue = formatToInput(initialValue);
         setValue(formattedValue);
         originalValue.current = formattedValue;
     }, [initialValue]);
+
+    useEffect(() => {
+        if (isEditing && inputRef.current) {
+            inputRef.current.focus();
+            // Відкриваємо нативний календар
+            try {
+                inputRef.current.showPicker?.();
+            } catch (e) {
+                // Якщо showPicker не підтримується, просто фокусуємо
+                console.log('showPicker not supported');
+            }
+        }
+    }, [isEditing]);
+
+    useEffect(() => {
+        return () => {
+            if (blurTimeoutRef.current) {
+                clearTimeout(blurTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const formatToInput = (date: string | Date | null | undefined): string => {
         if (!date) return "";
@@ -99,6 +123,10 @@ function EditableDateCell({
     };
 
     const handleSave = () => {
+        if (blurTimeoutRef.current) {
+            clearTimeout(blurTimeoutRef.current);
+        }
+
         setIsEditing(false);
         if (value === originalValue.current) return;
 
@@ -117,6 +145,21 @@ function EditableDateCell({
 
         sendUpdate(recordId, field, valueToSend);
         originalValue.current = value;
+    };
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        // Перевіряємо чи фокус не перейшов на календар
+        const relatedTarget = e.relatedTarget as HTMLElement;
+
+        // Якщо це календар браузера, не закриваємо
+        if (relatedTarget && relatedTarget.tagName === 'INPUT') {
+            return;
+        }
+
+        // Затримка щоб дати час на вибір дати в календарі
+        blurTimeoutRef.current = setTimeout(() => {
+            handleSave();
+        }, 300);
     };
 
     const handleCancel = () => {
@@ -139,10 +182,21 @@ function EditableDateCell({
     if (!isEditing) {
         return (
             <div
-                className={cln(styles.viewMode, className)}
-                onClick={() => setIsEditing(true)}
-                title="Клікніть для редагування"
+                className={cln(styles.viewMode, className, { [styles.readOnly]: readOnly })}
+                onClick={() => !readOnly && setIsEditing(true)}
+                title={readOnly ? "Тільки для перегляду" : "Клікніть для редагування"}
             >
+                <CalendarIcon className={styles.icon} size={14} />
+                <span className={styles.dateText}>
+                    {formatDisplay(initialValue)}
+                </span>
+            </div>
+        );
+    }
+
+    if (readOnly) {
+        return (
+            <div className={cln(styles.viewMode, styles.readOnly, className)}>
                 <CalendarIcon className={styles.icon} size={14} />
                 <span className={styles.dateText}>
                     {formatDisplay(initialValue)}
@@ -157,9 +211,29 @@ function EditableDateCell({
                 ref={inputRef}
                 type={getInputType()}
                 value={value}
-                autoFocus
-                onChange={(e) => setValue(e.target.value)}
-                onBlur={handleSave}
+                onChange={(e) => {
+                    setValue(e.target.value);
+                    // Скасовуємо затримку при зміні значення
+                    if (blurTimeoutRef.current) {
+                        clearTimeout(blurTimeoutRef.current);
+                    }
+                }}
+                onBlur={handleBlur}
+                onClick={() => {
+                    // Відкриваємо календар при кліку
+                    if (inputRef.current) {
+                        try {
+                            inputRef.current.showPicker?.();
+                        } catch (e) {
+                            console.log('showPicker not supported');
+                        }
+                    }
+                }}
+                onFocus={() => {
+                    if (blurTimeoutRef.current) {
+                        clearTimeout(blurTimeoutRef.current);
+                    }
+                }}
                 onKeyDown={(e) => {
                     if (e.key === "Enter") {
                         handleSave();

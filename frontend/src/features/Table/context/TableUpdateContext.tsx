@@ -1,4 +1,6 @@
-import React, {createContext, useContext, useRef, useCallback, useState, useEffect, useMemo} from 'react';
+"use client";
+
+import React, {createContext, useContext, useRef, useCallback, useState, useEffect} from 'react';
 
 interface UpdateMessage {
     type: string;

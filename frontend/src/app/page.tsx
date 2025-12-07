@@ -1,11 +1,14 @@
-import Index from "@/features/Table/components/Table";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
+import {TableUpdateProvider} from "@/features/Table/context/TableUpdateContext";
+import TableContent from "@/features/Table/components/Table";
 
 export default function Home() {
     return (
         <main>
             <ReactQueryProvider>
-                <Index />
+                <TableUpdateProvider>
+                    <TableContent />
+                </TableUpdateProvider>
             </ReactQueryProvider>
         </main>
     );

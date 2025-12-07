@@ -10,7 +10,6 @@ export const useOutsideClick = (
             if (!ref.current) return;
 
             if (ref.current.contains(target)) return;
-            // Інакше викликаємо колбек
             callback();
         };
 
