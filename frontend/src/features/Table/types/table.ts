@@ -12,14 +12,16 @@ export type IRecord = {
     is_active: boolean;
     created_at: Date;
     updated_at: Date;
-    tags: string[];
     attributes: string[];
+    primary_attribute: string | null;
     level: number;
     priority: number;
     code: string;
     group_id: number;
     firstnames: string;
     lastnames: string;
+    tags: string[];
+    primary_tag: string | null;
     meta: {
         source: string;
         verified: boolean;

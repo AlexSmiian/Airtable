@@ -82,7 +82,6 @@ export const columns: ColumnDef<IRecord, any>[] = [
         header: () => "Category",
         cell: info => {
             const record = info.row.original;
-
             const displayValue = record.primary_category || info.getValue();
 
             return (
@@ -213,9 +212,11 @@ export const columns: ColumnDef<IRecord, any>[] = [
         id: 'code',
         header: () => "Code",
         cell: info => (
-            <div className="font-mono text-sm text-gray-900">
-                {info.getValue()}
-            </div>
+            <EditableCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="code"
+            />
         ),
         enableSorting: true,
     }),
@@ -237,27 +238,37 @@ export const columns: ColumnDef<IRecord, any>[] = [
     columnHelper.accessor('tags', {
         id: 'tags',
         header: () => "Tags",
-        cell: info => (
-            <RenderArrayCell
-                items={info.getValue()}
-                variant="tags"
-                maxVisible={3}
-            />
-        ),
-        enableSorting: false,
+        cell: info => {
+            const record = info.row.original;
+            const displayValue = record.primary_tag || info.getValue();
+
+            return (
+                <EditableSelectCell
+                    value={displayValue ? displayValue.toString() : null}
+                    recordId={record.id}
+                    field="primary_tag"
+                    variant="tag"
+                />
+            );
+        },
     }),
 
     columnHelper.accessor('attributes', {
         id: 'attributes',
         header: () => "Attributes",
-        cell: info => (
-            <RenderArrayCell
-                items={info.getValue()}
-                variant="attributes"
-                maxVisible={3}
-            />
-        ),
-        enableSorting: false,
+        cell: info => {
+            const record = info.row.original;
+            const displayValue = record.primary_attribute || info.getValue();
+
+            return (
+                <EditableSelectCell
+                    value={displayValue ? displayValue.toString() : null}
+                    recordId={record.id}
+                    field="primary_attribute"
+                    variant="attribute"
+                />
+            );
+        },
     }),
 
     columnHelper.accessor('comment', {
