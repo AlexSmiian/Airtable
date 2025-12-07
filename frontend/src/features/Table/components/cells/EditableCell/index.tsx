@@ -1,5 +1,3 @@
-// EditableCell.tsx
-
 import React, { useState, useRef, memo, useEffect } from "react";
 import cln from "classnames";
 import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";

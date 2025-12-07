@@ -9,6 +9,7 @@ import {RenderDateCell} from "@/features/Table/components/cells/RenderDateCell";
 import {RenderMetaCell} from "@/features/Table/components/cells/RenderMetaCell";
 import EditableCell from "@/features/Table/components/cells/EditableCell";
 import EditableSelectCell from "@/features/Table/components/cells/EditableSelectCell";
+import EditableNumberCell from "@/features/Table/components/cells/EditableNumberCell/EditableNumberCell";
 
 const columnHelper = createColumnHelper<IRecord>();
 
@@ -125,9 +126,10 @@ export const columns: ColumnDef<IRecord, any>[] = [
         id: 'quantity',
         header: () => "Quantity",
         cell: info => (
-            <RenderNumberCell
-                value={info.getValue()}
-                format="integer"
+            <EditableNumberCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
+                field="quantity"
             />
         ),
         enableSorting: true,
