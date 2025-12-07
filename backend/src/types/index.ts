@@ -1,8 +1,15 @@
+export interface Attribute {
+    key: 'color' | 'size' | 'weight';
+    value: string | number;
+    type: 'text' | 'number';
+}
+
 export interface Record {
     id: string;
     title: string;
     description: string;
-    category: string;
+    category: string[];
+    primary_category: string | null;
     status: string;
     amount: number;
     quantity: number;
@@ -12,7 +19,9 @@ export interface Record {
     created_at: Date;
     updated_at: Date;
     tags: string[];
+    primary_tag: string | null;
     attributes: Attribute[];
+    primary_attribute: string | null;
     level: number;
     priority: number;
     code: string;
@@ -26,15 +35,11 @@ export interface Record {
     comment: string;
 }
 
-export interface Attribute {
-    key: 'color' | 'size' | 'weight';
-    value: string | number;
-    type: 'text' | 'number';
-}
+export type RecordKeys = keyof Record;
 
 export interface Column {
     id: string;
-    field: keyof Record;
+    field: RecordKeys;
     name: string;
     type: ColumnType;
     editable: boolean;
@@ -75,7 +80,7 @@ export interface WSMessage {
 
 export interface FieldUpdatePayload {
     recordId: number;
-    field: keyof Record;
+    field: RecordKeys;
     value: any;
     userId?: string;
 }

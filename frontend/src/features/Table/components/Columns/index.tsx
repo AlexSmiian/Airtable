@@ -8,10 +8,10 @@ import {RenderArrayCell} from "@/features/Table/components/cells/RenderArrayCell
 import {RenderDateCell} from "@/features/Table/components/cells/RenderDateCell";
 import {RenderMetaCell} from "@/features/Table/components/cells/RenderMetaCell";
 import EditableCell from "@/features/Table/components/cells/EditableCell";
+import EditableSelectCell from "@/features/Table/components/cells/EditableSelectCell";
 
 const columnHelper = createColumnHelper<IRecord>();
 
-// Статичні колонки
 export const columns: ColumnDef<IRecord, any>[] = [
     columnHelper.accessor("id", {
         id: 'id',
@@ -80,13 +80,20 @@ export const columns: ColumnDef<IRecord, any>[] = [
     columnHelper.accessor('category', {
         id: 'category',
         header: () => "Category",
-        cell: info => (
-            <RenderSelectCell
-                value={info.getValue()}
-                variant="category"
-            />
-        ),
-        enableSorting: true,
+        cell: info => {
+            const record = info.row.original;
+
+            const displayValue = record.primary_category || info.getValue();
+
+            return (
+                <EditableSelectCell
+                    value={displayValue ? displayValue.toString() : null}
+                    recordId={record.id}
+                    field="primary_category"
+                    variant="category"
+                />
+            );
+        },
     }),
 
     columnHelper.accessor('status', {

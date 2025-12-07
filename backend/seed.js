@@ -1,4 +1,5 @@
 // backend/seed.js
+
 import pkg from 'pg';
 const { Pool } = pkg;
 import dotenv from 'dotenv';
@@ -24,6 +25,7 @@ const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Moore', 'Tay
 const statuses = ['Active', 'Pending', 'Completed', 'Cancelled', 'On Hold'];
 const categories = ['Marketing', 'Sales', 'Development', 'Design', 'Support'];
 const priorities = ['Low', 'Medium', 'High', 'Critical'];
+const fullTags = ['urgent', 'review', 'approved'];
 const attributesOptions = ['size', 'color', 'weight', 'height', 'width', 'depth', 'material', 'brand', 'model', 'capacity', 'power', 'voltage', 'speed', 'temperature', 'length', 'diameter'];
 
 function randomItem(arr) {
@@ -58,7 +60,6 @@ async function seed() {
         for (let i = 0; i < TOTAL_RECORDS; i += BATCH_SIZE) {
             const batchSize = Math.min(BATCH_SIZE, TOTAL_RECORDS - i);
 
-            // Генеруємо VALUES для одного батча
             const valueRows = [];
             for (let j = 0; j < batchSize; j++) {
                 const firstName = randomItem(firstNames);
@@ -66,12 +67,8 @@ async function seed() {
                 const title = `${firstName} ${lastName}`;
                 const description = `Project ${i + j + 1}`;
 
-                const category = JSON.stringify([
-                    randomItem(categories),
-                    randomItem(categories),
-                    randomItem(categories),
-                    randomItem(categories),
-                ]);
+                const category = JSON.stringify(categories);
+                const primaryCategory = randomItem(categories);
 
                 const status = randomItem(statuses);
                 const amount = randomNumber(1000, 100000);
@@ -80,17 +77,11 @@ async function seed() {
                 const rate = parseFloat(Math.random().toFixed(4));
                 const isActive = Math.random() > 0.3;
 
-                const tags = JSON.stringify([
-                    randomItem(['urgent', 'review', 'approved']),
-                    randomItem(['backend', 'frontend', 'design'])
-                ]);
+                const tags = JSON.stringify(fullTags);
+                const primaryTag = randomItem(fullTags);
 
-                const attributes = JSON.stringify([
-                    randomItem(attributesOptions),
-                    randomItem(attributesOptions),
-                    randomItem(attributesOptions),
-                    randomItem(attributesOptions),
-                ]);
+                const attributes = JSON.stringify(attributesOptions);
+                const primaryAttribute = randomItem(attributesOptions);
 
                 const level = randomNumber(0, 4);
                 const priority = randomNumber(0, 3);
@@ -110,6 +101,7 @@ async function seed() {
                     `'${lastName.replace(/'/g, "''")}', ` +
                     `'${description}', ` +
                     `'${category}'::jsonb, ` +
+                    `'${primaryCategory}', ` +
                     `'${status}', ` +
                     `${amount}, ` +
                     `${quantity}, ` +
@@ -117,7 +109,9 @@ async function seed() {
                     `${rate}, ` +
                     `${isActive}, ` +
                     `'${tags}'::jsonb, ` +
+                    `'${primaryTag}', ` + // ✅ Додаємо primary_tag
                     `'${attributes}'::jsonb, ` +
+                    `'${primaryAttribute}', ` +
                     `${level}, ` +
                     `${priority}, ` +
                     `'${code}', ` +
@@ -129,8 +123,8 @@ async function seed() {
 
             const query = `
                 INSERT INTO records (
-                    title, firstNames, lastNames, description, category, status,
-                    amount, quantity, price, rate, is_active, tags, attributes,
+                    title, firstNames, lastNames, description, category, primary_category, status,
+                    amount, quantity, price, rate, is_active, tags, primary_tag, attributes, primary_attribute,
                     level, priority, code, group_id, meta, comment
                 ) VALUES
                     ${valueRows.join(',\n')}
@@ -151,7 +145,7 @@ async function seed() {
         const stats = await client.query(`
             SELECT
                 COUNT(*) as total,
-                COUNT(DISTINCT category) as categories,
+                COUNT(DISTINCT primary_category) as categories,
                 COUNT(DISTINCT status) as statuses,
                 SUM(CASE WHEN is_active THEN 1 ELSE 0 END) as active_records
             FROM records

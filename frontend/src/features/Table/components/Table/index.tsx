@@ -46,7 +46,6 @@ function TableContent() {
 
         if (lastMessage.type === 'FIELD_UPDATED') {
             const rawRecordId = lastMessage.payload.record?.id ?? lastMessage.payload.id;
-            // ✅ Приводимо ID до рядка, щоб забезпечити коректне порівняння
             const recordIdString = String(rawRecordId);
 
             const field = lastMessage.payload.field;
@@ -59,13 +58,12 @@ function TableContent() {
 
                 const newPages = oldData.pages.map(page =>
                     page.map(r =>
-                        String(r.id) === recordIdString // ✅ Порівнюємо рядки
+                        String(r.id) === recordIdString
                             ? { ...r, [field]: value }
                             : r
                     )
                 );
 
-                // Якщо хоч один рядок в newPages відрізняється від oldData.pages, re-render відбудеться
                 return { ...oldData, pages: newPages };
             });
         }

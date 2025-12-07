@@ -2,7 +2,8 @@ export type IRecord = {
     id: number;
     title: string;
     description: string;
-    category: string;
+    category: string[];
+    primary_category: string;
     status: string;
     amount: number;
     quantity: number;

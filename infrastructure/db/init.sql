@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS records CASCADE;
 
 CREATE TABLE records (
@@ -8,6 +7,7 @@ CREATE TABLE records (
                          lastNames TEXT,
                          description TEXT,
                          category JSONB,
+                         primary_category TEXT,
                          status TEXT,
                          amount NUMERIC,
                          quantity INT,
@@ -17,7 +17,9 @@ CREATE TABLE records (
                          created_at TIMESTAMP DEFAULT NOW(),
                          updated_at TIMESTAMP DEFAULT NOW(),
                          tags JSONB,
+                         primary_tag TEXT,
                          attributes JSONB,
+                         primary_attribute TEXT,
                          level INT,
                          priority INT,
                          code TEXT,

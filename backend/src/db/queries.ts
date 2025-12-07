@@ -8,8 +8,30 @@ export class RecordQueries {
             {id: 'title', field: 'title', name: 'Title', type: 'text', editable: true},
             {id: 'description', field: 'description', name: 'Description', type: 'text', editable: true},
             {
-                id: 'category',
+                id: 'category_list',
                 field: 'category',
+                name: 'Category (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'tags_list',
+                field: 'tags',
+                name: 'Tags (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_tag',
+                field: 'primary_tag',
+                name: 'Primary Tag',
+                type: 'select',
+                editable: true,
+                options: ['urgent', 'review', 'approved']
+            },
+            {
+                id: 'primary_category',
+                field: 'primary_category',
                 name: 'Category',
                 type: 'select',
                 editable: true,
@@ -32,9 +54,16 @@ export class RecordQueries {
             {id: 'priority', field: 'priority', name: 'Priority', type: 'select', editable: true},
             {id: 'code', field: 'code', name: 'Code', type: 'text', editable: true},
             {
-                id: 'attributes',
+                id: 'attributes_list',
                 field: 'attributes',
-                name: 'Attributes',
+                name: 'Attributes (List)',
+                type: 'json',
+                editable: false,
+            },
+            {
+                id: 'primary_attribute',
+                field: 'primary_attribute',
+                name: 'Attribute',
                 type: 'select',
                 editable: true,
                 options: ['size', 'color', 'weight', 'height', 'width', 'depth', 'material', 'brand', 'model', 'capacity', 'power', 'voltage', 'speed', 'temperature', 'length', 'diameter']
@@ -62,7 +91,9 @@ export class RecordQueries {
     }
 
     private static getAllFields(): string[] {
-        return this.getColums().map(col => col.field);
+        // Усуваємо дублікати, хоча у вашому поточному списку їх немає, це хороша практика.
+        const uniqueFields = Array.from(new Set(this.getColums().map(col => col.field)));
+        return uniqueFields;
     }
 
     private static getSortableFields(): string[] {
@@ -76,7 +107,7 @@ export class RecordQueries {
         const {limit, offset, sortBy = "id", sortOrder = 'asc'} = params;
 
         const allFields = this.getAllFields();
-        const selectFields = allFields.join(', ');
+        const selectFields = allFields.join(', '); // Включаємо всі колонки DB, щоб клієнт отримав повний об'єкт Record
 
         const allowedSortFields = this.getSortableFields();
         const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'id';
@@ -116,9 +147,14 @@ export class RecordQueries {
         const columnConfig = columns.find(col => col.field === field);
 
         let queryValue = value;
-        if (columnConfig?.type === 'json' && typeof value === 'object') {
+
+        // Обробка JSONB полів, які дозволені для редагування (наприклад, 'meta')
+        if (columnConfig?.type === 'json' && typeof value === 'object' && value !== null) {
             queryValue = JSON.stringify(value);
         }
+        // Примітка: Поля 'primary_category', 'primary_tag', 'primary_attribute' мають type: 'select',
+        // що відповідає TEXT у DB. Драйвер PG обробить string або null коректно,
+        // тому додаткової JSON-серіалізації тут не потрібно.
 
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
@@ -127,8 +163,8 @@ export class RecordQueries {
             `UPDATE records
              SET ${field} = $1,
                  updated_at = NOW()
-             WHERE id = $2 
-             RETURNING ${selectFields}`,
+             WHERE id = $2
+                 RETURNING ${selectFields}`,
             [queryValue, recordId]
         );
 
@@ -174,10 +210,12 @@ export class RecordQueries {
                 break;
             case 'select':
                 if (columnConfig.options && !columnConfig.options.includes(value)) {
-                    return {
-                        valid: false,
-                        error: `${field} must be one of: ${columnConfig.options.join(', ')}`
-                    };
+                    if (value !== null && value !== '') {
+                        return {
+                            valid: false,
+                            error: `${field} must be one of: ${columnConfig.options.join(', ')}`
+                        };
+                    }
                 }
                 break;
         }
