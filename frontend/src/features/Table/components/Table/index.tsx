@@ -3,7 +3,7 @@
 import React, {useRef, useCallback, useMemo, useEffect} from 'react';
 import {
     useInfiniteQuery,
-    InfiniteData, useQueryClient
+    InfiniteData, useQueryClient,
 } from "@tanstack/react-query";
 import {
     useReactTable,
@@ -38,7 +38,8 @@ export default function TableContent() {
             lastPage.length < PAGE_SIZE ? undefined : allPages.length * PAGE_SIZE,
         initialPageParam: 0,
     });
-    const {lastMessage} = useTableUpdate();
+
+    const {pendingUpdates, lastMessage} = useTableUpdate();
     const queryClient = useQueryClient();
 
     useEffect(() => {
@@ -47,11 +48,18 @@ export default function TableContent() {
         if (lastMessage.type === 'FIELD_UPDATED') {
             const rawRecordId = lastMessage.payload.record?.id ?? lastMessage.payload.id;
             const recordIdString = String(rawRecordId);
-
             const field = lastMessage.payload.field;
             const value = lastMessage.payload.value;
 
-            console.log('Updating record id (stringified):', recordIdString, 'field:', field, 'value:', value);
+            const key = `${recordIdString}-${field}`;
+            const isPending = pendingUpdates.has(key);
+
+            if (isPending) {
+                console.log('⏭️ Skipping own update:', key);
+                return;
+            }
+
+            console.log('🔄 Applying remote update:', {recordIdString, field, value});
 
             queryClient.setQueryData<InfiniteData<IRecord[]>>(['tableData'], (oldData) => {
                 if (!oldData) return oldData;
@@ -59,7 +67,7 @@ export default function TableContent() {
                 const newPages = oldData.pages.map(page =>
                     page.map(r =>
                         String(r.id) === recordIdString
-                            ? {...r, [field]: value}
+                            ? {...r, [field]: value, updated_at: new Date()}
                             : r
                     )
                 );
@@ -67,8 +75,7 @@ export default function TableContent() {
                 return {...oldData, pages: newPages};
             });
         }
-    }, [lastMessage, queryClient]);
-
+    }, [lastMessage, queryClient, pendingUpdates]);
 
     const tableData = useMemo(() => data?.pages.flat() ?? [], [data?.pages]);
 
@@ -132,97 +139,106 @@ export default function TableContent() {
         );
     }
 
+    const pendingCount = pendingUpdates.size;
+
     return (
-        <div
-            ref={tableContainerRef}
-            className={styles.wrapper}
-            onScroll={handleScroll}
-        >
-            <div className={styles.table}>
-                <div className={styles.header}>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <div key={headerGroup.id} className={styles.headerRow}>
-                            {headerGroup.headers.map(header => {
-                                const size = header.getSize();
-                                const isFlexible = size === 150;
-                                return (
-                                    <div
-                                        key={header.id}
-                                        className={styles.headerCell}
-                                        style={{
-                                            flex: isFlexible ? '1 1 0%' : `0 0 ${size}px`,
-                                            minWidth: isFlexible ? '150px' : `${size}px`,
-                                        }}
-                                    >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
+        <>
+            {pendingCount > 0 && (
+                <div className={styles.pendingIndicator}>
+                    ⏳ Синхронізація: {pendingCount} {pendingCount === 1 ? 'оновлення' : 'оновлень'}
                 </div>
-                <div
-                    className={styles.body}
-                    style={{height: `${totalSize}px`}}
-                >
-                    {virtualRows.map(virtualRow => {
-                        const row = table.getRowModel().rows[virtualRow.index];
-                        if (!row) return null;
-
-                        return (
-                            <div
-                                key={row.id}
-                                data-index={virtualRow.index}
-                                ref={rowVirtualizer.measureElement}
-                                className={styles.row}
-                                style={{
-                                    transform: `translateY(${virtualRow.start}px)`,
-                                    position: 'absolute',
-                                    width: '100%',
-                                }}
-                            >
-                                {row.getVisibleCells().map(cell => {
-                                    const size = cell.column.getSize();
+            )}
+            <div
+                ref={tableContainerRef}
+                className={styles.wrapper}
+                onScroll={handleScroll}
+            >
+                <div className={styles.table}>
+                    <div className={styles.header}>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <div key={headerGroup.id} className={styles.headerRow}>
+                                {headerGroup.headers.map(header => {
+                                    const size = header.getSize();
                                     const isFlexible = size === 150;
-
                                     return (
                                         <div
-                                            key={cell.id}
-                                            className={styles.cell}
+                                            key={header.id}
+                                            className={styles.headerCell}
                                             style={{
                                                 flex: isFlexible ? '1 1 0%' : `0 0 ${size}px`,
                                                 minWidth: isFlexible ? '150px' : `${size}px`,
                                             }}
                                         >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
                                         </div>
                                     );
                                 })}
                             </div>
-                        );
-                    })}
-                    {isFetchingNextPage && (
-                        <div
-                            className={styles.loadingMore}
-                            style={{
-                                transform: `translateY(${totalSize}px)`,
-                                position: 'absolute',
-                                width: '100%',
-                            }}
-                        >
-                            Завантаження ще...
-                        </div>
-                    )}
+                        ))}
+                    </div>
+                    <div
+                        className={styles.body}
+                        style={{height: `${totalSize}px`}}
+                    >
+                        {virtualRows.map(virtualRow => {
+                            const row = table.getRowModel().rows[virtualRow.index];
+                            if (!row) return null;
+
+                            return (
+                                <div
+                                    key={row.id}
+                                    data-index={virtualRow.index}
+                                    ref={rowVirtualizer.measureElement}
+                                    className={styles.row}
+                                    style={{
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                        position: 'absolute',
+                                        width: '100%',
+                                    }}
+                                >
+                                    {row.getVisibleCells().map(cell => {
+                                        const size = cell.column.getSize();
+                                        const isFlexible = size === 150;
+
+                                        return (
+                                            <div
+                                                key={cell.id}
+                                                className={styles.cell}
+                                                style={{
+                                                    flex: isFlexible ? '1 1 0%' : `0 0 ${size}px`,
+                                                    minWidth: isFlexible ? '150px' : `${size}px`,
+                                                }}
+                                            >
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })}
+                        {isFetchingNextPage && (
+                            <div
+                                className={styles.loadingMore}
+                                style={{
+                                    transform: `translateY(${totalSize}px)`,
+                                    position: 'absolute',
+                                    width: '100%',
+                                }}
+                            >
+                                Завантаження ще...
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
