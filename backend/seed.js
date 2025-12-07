@@ -1,16 +1,15 @@
-// backend/seed.js
-
 import pkg from 'pg';
-const { Pool } = pkg;
+
+const {Pool} = pkg;
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
-dotenv.config({ path: path.resolve(__dirname, '../', envFile) });
+dotenv.config({path: path.resolve(__dirname, '../', envFile)});
 
 const pool = new Pool({
     user: process.env.POSTGRES_USER,
@@ -125,11 +124,13 @@ async function seed() {
             }
 
             const query = `
-                INSERT INTO records (
-                    title, first_names, last_names, description, category, primary_category, status, primary_status,
-                    amount, quantity, price, rate, is_active, primary_is_active, tags, primary_tag, attributes, primary_attribute,
-                    level, primary_level, priority, primary_priority, code, group_id, meta, primary_meta, comment
-                ) VALUES
+                INSERT INTO records (title, first_names, last_names, description, category, primary_category, status,
+                                     primary_status,
+                                     amount, quantity, price, rate, is_active, primary_is_active, tags, primary_tag,
+                                     attributes, primary_attribute,
+                                     level, primary_level, priority, primary_priority, code, group_id, meta,
+                                     primary_meta, comment)
+                VALUES
                     ${valueRows.join(',\n')}
             `;
 
@@ -146,10 +147,9 @@ async function seed() {
         await client.query('COMMIT');
 
         const stats = await client.query(`
-            SELECT
-                COUNT(*) as total,
-                COUNT(DISTINCT primary_category) as categories,
-                COUNT(DISTINCT primary_status) as statuses
+            SELECT COUNT(*)                         as total,
+                   COUNT(DISTINCT primary_category) as categories,
+                   COUNT(DISTINCT primary_status)   as statuses
             FROM records
         `);
 

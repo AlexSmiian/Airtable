@@ -1,14 +1,13 @@
 import {Router} from "express";
 import {RecordController} from "../controllers/recordController.ts";
 
-
 const router = Router();
 
 router.get('/health', (req, res) => {
     res.json({
         status: 200,
         timestamp: new Date().toISOString(),
-        service: 'GuruApps Index API'
+        service: 'AirTable Index API'
     });
 });
 

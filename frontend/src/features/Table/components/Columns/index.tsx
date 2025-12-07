@@ -349,5 +349,4 @@ export const columns: ColumnDef<IRecord, any>[] = [
                 );
             },
         }),
-    ]
-;
+    ];

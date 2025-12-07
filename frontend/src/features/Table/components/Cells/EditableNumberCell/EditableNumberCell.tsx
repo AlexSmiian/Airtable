@@ -1,6 +1,6 @@
-import React, { useState, useRef, memo, useEffect, useCallback, useMemo } from "react";
+import React, {useState, useRef, memo, useEffect, useCallback, useMemo} from "react";
 import cln from "classnames";
-import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
+import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableNumberCell.module.scss";
 
 interface EditableCellProps {
@@ -16,7 +16,7 @@ function EditableNumberCell({
                                 field,
                                 className = ""
                             }: EditableCellProps) {
-    const { sendUpdate } = useTableUpdate();
+    const {sendUpdate} = useTableUpdate();
     const [isEditing, setIsEditing] = useState(false);
 
     const safeInitialValue = useMemo(() => {
@@ -102,7 +102,9 @@ function EditableNumberCell({
             inputMode="numeric"
             value={value}
             autoFocus
-            onFocus={() => { originalValue.current = value; }}
+            onFocus={() => {
+                originalValue.current = value;
+            }}
             onBlur={handleSave}
             onInput={handleChange}
             onChange={handleChange}

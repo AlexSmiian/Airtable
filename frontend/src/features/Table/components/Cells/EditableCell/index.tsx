@@ -1,6 +1,6 @@
-import React, { useState, useRef, memo, useEffect } from "react";
+import React, {useState, useRef, memo, useEffect} from "react";
 import cln from "classnames";
-import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
+import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableCell.module.scss";
 
 interface EditableCellProps {
@@ -16,7 +16,7 @@ function EditableCell({
                           field,
                           className = ""
                       }: EditableCellProps) {
-    const { sendUpdate } = useTableUpdate();
+    const {sendUpdate} = useTableUpdate();
     const [value, setValue] = useState(initialValue || "");
     const [isEditing, setIsEditing] = useState(false);
     const originalValue = useRef(initialValue);

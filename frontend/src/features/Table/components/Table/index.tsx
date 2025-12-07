@@ -10,10 +10,10 @@ import {
     getCoreRowModel,
     flexRender,
 } from "@tanstack/react-table";
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { IRecord } from "@/features/Table/types/table";
-import { columns } from "@/features/Table/components/Columns";
-import { fetchTableData } from "@/features/Table/api/tableApi";
+import {useVirtualizer} from '@tanstack/react-virtual';
+import {IRecord} from "@/features/Table/types/table";
+import {columns} from "@/features/Table/components/Columns";
+import {fetchTableData} from "@/features/Table/api/tableApi";
 import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 
 import styles from "./table.module.scss";
@@ -33,12 +33,12 @@ export default function TableContent() {
         error,
     } = useInfiniteQuery<IRecord[], Error, InfiniteData<IRecord[]>, string[], PageParamType>({
         queryKey: ['tableData'],
-        queryFn: ({ pageParam = 0 }) => fetchTableData(pageParam, PAGE_SIZE),
+        queryFn: ({pageParam = 0}) => fetchTableData(pageParam, PAGE_SIZE),
         getNextPageParam: (lastPage, allPages) =>
             lastPage.length < PAGE_SIZE ? undefined : allPages.length * PAGE_SIZE,
         initialPageParam: 0,
     });
-    const { lastMessage } = useTableUpdate();
+    const {lastMessage} = useTableUpdate();
     const queryClient = useQueryClient();
 
     useEffect(() => {
@@ -59,12 +59,12 @@ export default function TableContent() {
                 const newPages = oldData.pages.map(page =>
                     page.map(r =>
                         String(r.id) === recordIdString
-                            ? { ...r, [field]: value }
+                            ? {...r, [field]: value}
                             : r
                     )
                 );
 
-                return { ...oldData, pages: newPages };
+                return {...oldData, pages: newPages};
             });
         }
     }, [lastMessage, queryClient]);
@@ -96,7 +96,7 @@ export default function TableContent() {
         const container = tableContainerRef.current;
         if (!container) return;
 
-        const { scrollTop, scrollHeight, offsetHeight } = container;
+        const {scrollTop, scrollHeight, offsetHeight} = container;
 
         const scrollThreshold = 200;
         if (
@@ -168,7 +168,7 @@ export default function TableContent() {
                 </div>
                 <div
                     className={styles.body}
-                    style={{ height: `${totalSize}px` }}
+                    style={{height: `${totalSize}px`}}
                 >
                     {virtualRows.map(virtualRow => {
                         const row = table.getRowModel().rows[virtualRow.index];

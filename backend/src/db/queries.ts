@@ -216,16 +216,14 @@ export class RecordQueries {
 
         const allFields = this.getAllFields();
         const selectFields = allFields.join(', ');
-
-        // Оновлюємо updated_at тільки якщо це НЕ саме поле updated_at
         const shouldUpdateTimestamp = field !== 'updated_at' && field !== 'created_at';
 
         const updateQuery = shouldUpdateTimestamp
             ? `UPDATE records
-               SET ${field} = $1,
+               SET ${field}   = $1,
                    updated_at = NOW()
                WHERE id = $2
-               RETURNING ${selectFields}`
+                   RETURNING ${selectFields}`
             : `UPDATE records
                SET ${field} = $1
                WHERE id = $2

@@ -8,7 +8,7 @@ interface UpdateMessage {
 }
 
 interface TableUpdateContextValue {
-    sendUpdate: (id: number , field: string, value: any) => void;
+    sendUpdate: (id: number, field: string, value: any) => void;
     isConnected: boolean;
     lastMessage: UpdateMessage | null;
 }
@@ -21,7 +21,7 @@ export function useTableUpdate() {
     return context;
 }
 
-export function TableUpdateProvider({ children }: { children: React.ReactNode }) {
+export function TableUpdateProvider({children}: { children: React.ReactNode }) {
     const wsRef = useRef<WebSocket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [lastMessage, setLastMessage] = useState<UpdateMessage | null>(null);
@@ -58,12 +58,12 @@ export function TableUpdateProvider({ children }: { children: React.ReactNode })
 
         ws.send(JSON.stringify({
             type: 'FIELD_UPDATE',
-            payload: { recordId: id, field, value }
+            payload: {recordId: id, field, value}
         }));
     }, []);
 
     return (
-        <TableUpdateContext.Provider value={{ sendUpdate, isConnected, lastMessage }}>
+        <TableUpdateContext.Provider value={{sendUpdate, isConnected, lastMessage}}>
             {children}
         </TableUpdateContext.Provider>
     );

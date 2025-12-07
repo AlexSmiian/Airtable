@@ -50,7 +50,6 @@ export interface Column {
 
 export type ColumnType = "text" | "number" | 'select' | 'boolean' | 'date' | 'json';
 
-
 export interface TableDataResponse {
     records: Record[];
     total: number;

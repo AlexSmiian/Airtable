@@ -1,6 +1,6 @@
 import React, {useState, useRef, memo, useEffect, useMemo} from "react";
 import cln from "classnames";
-import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
+import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableRateCell.module.scss";
 
 interface EditableRateCellProps {
@@ -21,7 +21,7 @@ function EditableRateCell({
                               className = ""
                           }: EditableRateCellProps) {
 
-    const { sendUpdate } = useTableUpdate();
+    const {sendUpdate} = useTableUpdate();
 
     const [value, setValue] = useState(initialValue?.toString() || "");
     const [isEditing, setIsEditing] = useState(false);

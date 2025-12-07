@@ -1,7 +1,7 @@
 "use client";
 
 import React, {JSX, useState, useCallback, useMemo, useRef, useEffect, memo} from "react";
-import { createPortal } from "react-dom";
+import {createPortal} from "react-dom";
 import styles from "./editableSelectCell.module.scss";
 import cln from "classnames";
 import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
@@ -22,71 +22,71 @@ interface SelectCellProps {
 
 const OPTIONS_MAP: Record<string, Option[]> = {
     status: [
-        { label: 'Active', value: 'Active', colorClass: styles.bgGreen },
-        { label: 'Pending', value: 'Pending', colorClass: styles.bgYellow },
-        { label: 'Completed', value: 'Completed', colorClass: styles.bgBlue },
-        { label: 'Cancelled', value: 'Cancelled', colorClass: styles.bgRed },
-        { label: 'On Hold', value: 'On Hold', colorClass: styles.bgGray },
+        {label: 'Active', value: 'Active', colorClass: styles.bgGreen},
+        {label: 'Pending', value: 'Pending', colorClass: styles.bgYellow},
+        {label: 'Completed', value: 'Completed', colorClass: styles.bgBlue},
+        {label: 'Cancelled', value: 'Cancelled', colorClass: styles.bgRed},
+        {label: 'On Hold', value: 'On Hold', colorClass: styles.bgGray},
     ],
     priority: [
-        { label: 'High', value: 'High', colorClass: styles.bgRed },
-        { label: 'Medium', value: 'Medium', colorClass: styles.bgYellow },
-        { label: 'Low', value: 'Low', colorClass: styles.bgGreen },
-        { label: 'Critical', value: 'Critical', colorClass: styles.bgRed },
+        {label: 'High', value: 'High', colorClass: styles.bgRed},
+        {label: 'Medium', value: 'Medium', colorClass: styles.bgYellow},
+        {label: 'Low', value: 'Low', colorClass: styles.bgGreen},
+        {label: 'Critical', value: 'Critical', colorClass: styles.bgRed},
     ],
     category: [
-        { label: 'Design', value: 'Design', colorClass: styles.bgPurple },
-        { label: 'Development', value: 'Development', colorClass: styles.bgBlue },
-        { label: 'Marketing', value: 'Marketing', colorClass: styles.bgYellow },
-        { label: 'Sales', value: 'Sales', colorClass: styles.bgRed },
-        { label: 'Support', value: 'Support', colorClass: styles.bgCyan },
+        {label: 'Design', value: 'Design', colorClass: styles.bgPurple},
+        {label: 'Development', value: 'Development', colorClass: styles.bgBlue},
+        {label: 'Marketing', value: 'Marketing', colorClass: styles.bgYellow},
+        {label: 'Sales', value: 'Sales', colorClass: styles.bgRed},
+        {label: 'Support', value: 'Support', colorClass: styles.bgCyan},
     ],
     tag: [
-        { label: 'Urgent', value: 'urgent', colorClass: styles.bgRed },
-        { label: 'Review', value: 'review', colorClass: styles.bgYellow },
-        { label: 'Approved', value: 'approved', colorClass: styles.bgGreen },
+        {label: 'Urgent', value: 'urgent', colorClass: styles.bgRed},
+        {label: 'Review', value: 'review', colorClass: styles.bgYellow},
+        {label: 'Approved', value: 'approved', colorClass: styles.bgGreen},
     ],
     attribute: [
-        { label: 'Size', value: 'size', colorClass: styles.bgGray },
-        { label: 'Color', value: 'color', colorClass: styles.bgGray },
-        { label: 'Weight', value: 'weight', colorClass: styles.bgGray },
-        { label: 'Height', value: 'height', colorClass: styles.bgGray },
-        { label: 'Width', value: 'width', colorClass: styles.bgGray },
-        { label: 'Depth', value: 'depth', colorClass: styles.bgGray },
-        { label: 'Material', value: 'material', colorClass: styles.bgGray },
-        { label: 'Brand', value: 'brand', colorClass: styles.bgGray },
-        { label: 'Model', value: 'model', colorClass: styles.bgGray },
-        { label: 'Capacity', value: 'capacity', colorClass: styles.bgGray },
-        { label: 'Power', value: 'power', colorClass: styles.bgGray },
-        { label: 'Voltage', value: 'voltage', colorClass: styles.bgGray },
-        { label: 'Speed', value: 'speed', colorClass: styles.bgGray },
-        { label: 'Temperature', value: 'temperature', colorClass: styles.bgGray },
-        { label: 'Length', value: 'length', colorClass: styles.bgGray },
-        { label: 'Diameter', value: 'diameter', colorClass: styles.bgGray },
+        {label: 'Size', value: 'size', colorClass: styles.bgGray},
+        {label: 'Color', value: 'color', colorClass: styles.bgGray},
+        {label: 'Weight', value: 'weight', colorClass: styles.bgGray},
+        {label: 'Height', value: 'height', colorClass: styles.bgGray},
+        {label: 'Width', value: 'width', colorClass: styles.bgGray},
+        {label: 'Depth', value: 'depth', colorClass: styles.bgGray},
+        {label: 'Material', value: 'material', colorClass: styles.bgGray},
+        {label: 'Brand', value: 'brand', colorClass: styles.bgGray},
+        {label: 'Model', value: 'model', colorClass: styles.bgGray},
+        {label: 'Capacity', value: 'capacity', colorClass: styles.bgGray},
+        {label: 'Power', value: 'power', colorClass: styles.bgGray},
+        {label: 'Voltage', value: 'voltage', colorClass: styles.bgGray},
+        {label: 'Speed', value: 'speed', colorClass: styles.bgGray},
+        {label: 'Temperature', value: 'temperature', colorClass: styles.bgGray},
+        {label: 'Length', value: 'length', colorClass: styles.bgGray},
+        {label: 'Diameter', value: 'diameter', colorClass: styles.bgGray},
     ],
     level: [
-        { label: '1', value: '1', colorClass: styles.bgRed },
-        { label: '2', value: '2', colorClass: styles.bgYellow },
-        { label: '3', value: '3', colorClass: styles.bgGray },
-        { label: '4', value: '4', colorClass: styles.bgBlue },
-        { label: '5', value: '5', colorClass: styles.bgPurple },
-        { label: '6', value: '6', colorClass: styles.bgGreen },
-        { label: '7', value: '7', colorClass: styles.bgRed },
-        { label: '8', value: '8', colorClass: styles.bgYellow },
+        {label: '1', value: '1', colorClass: styles.bgRed},
+        {label: '2', value: '2', colorClass: styles.bgYellow},
+        {label: '3', value: '3', colorClass: styles.bgGray},
+        {label: '4', value: '4', colorClass: styles.bgBlue},
+        {label: '5', value: '5', colorClass: styles.bgPurple},
+        {label: '6', value: '6', colorClass: styles.bgGreen},
+        {label: '7', value: '7', colorClass: styles.bgRed},
+        {label: '8', value: '8', colorClass: styles.bgYellow},
     ],
     active: [
-        { label: 'True', value: 'true', colorClass: styles.bgGreen },
-        { label: 'False', value: 'false', colorClass: styles.bgRed },
-        { label: 'Canceled', value: 'canceled', colorClass: styles.bgGray },
+        {label: 'True', value: 'true', colorClass: styles.bgGreen},
+        {label: 'False', value: 'false', colorClass: styles.bgRed},
+        {label: 'Canceled', value: 'canceled', colorClass: styles.bgGray},
     ],
     meta: [
-        { label: 'System', value: 'system', colorClass: styles.bgBlue },
-        { label: 'User', value: 'user', colorClass: styles.bgGreen },
-        { label: 'Import', value: 'import', colorClass: styles.bgYellow },
+        {label: 'System', value: 'system', colorClass: styles.bgBlue},
+        {label: 'User', value: 'user', colorClass: styles.bgGreen},
+        {label: 'Import', value: 'import', colorClass: styles.bgYellow},
     ],
 };
 
-const EMPTY_OPTION_META: Option = { label: '— Видалити значення —', value: '', colorClass: styles.bgGray};
+const EMPTY_OPTION_META: Option = {label: '— Видалити значення —', value: '', colorClass: styles.bgGray};
 
 
 const getOptionData = (variant: string, singleValue: string | null): Option | undefined => {
@@ -110,9 +110,9 @@ function EditableSelectCell({
                                 field,
                                 variant = 'status',
                             }: SelectCellProps): JSX.Element {
-    const { sendUpdate } = useTableUpdate();
+    const {sendUpdate} = useTableUpdate();
     const [isOpen, setIsOpen] = useState(false);
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+    const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0, width: 0});
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {

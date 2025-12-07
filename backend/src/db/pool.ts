@@ -19,7 +19,6 @@ pool.on('error', (error) => {
     process.exit(-1);
 });
 
-
 export async function checkConnection() {
     try {
         const client = await pool.connect()

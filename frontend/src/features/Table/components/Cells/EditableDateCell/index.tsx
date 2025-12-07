@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useRef, memo, useEffect } from "react";
+import React, {useState, useRef, memo, useEffect} from "react";
 import cln from "classnames";
-import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
+import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableDateCell.module.scss";
 
-const CalendarIcon = ({ className, size = 14 }: { className?: string; size?: number }) => (
+const CalendarIcon = ({className, size = 14}: { className?: string; size?: number }) => (
     <svg
         width={size}
         height={size}
@@ -17,10 +17,10 @@ const CalendarIcon = ({ className, size = 14 }: { className?: string; size?: num
         strokeLinejoin="round"
         className={className}
     >
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
 );
 
@@ -42,7 +42,7 @@ function EditableDateCell({
                               readOnly = false
                           }: EditableDateCellProps) {
 
-    const { sendUpdate } = useTableUpdate();
+    const {sendUpdate} = useTableUpdate();
     const [isEditing, setIsEditing] = useState(false);
     const [value, setValue] = useState("");
     const originalValue = useRef("");
@@ -176,11 +176,11 @@ function EditableDateCell({
     if (!isEditing) {
         return (
             <div
-                className={cln(styles.viewMode, className, { [styles.readOnly]: readOnly })}
+                className={cln(styles.viewMode, className, {[styles.readOnly]: readOnly})}
                 onClick={() => !readOnly && setIsEditing(true)}
                 title={readOnly ? "Тільки для перегляду" : "Клікніть для редагування"}
             >
-                <CalendarIcon className={styles.icon} size={14} />
+                <CalendarIcon className={styles.icon} size={14}/>
                 <span className={styles.dateText}>
                     {formatDisplay(initialValue)}
                 </span>
@@ -191,7 +191,7 @@ function EditableDateCell({
     if (readOnly) {
         return (
             <div className={cln(styles.viewMode, styles.readOnly, className)}>
-                <CalendarIcon className={styles.icon} size={14} />
+                <CalendarIcon className={styles.icon} size={14}/>
                 <span className={styles.dateText}>
                     {formatDisplay(initialValue)}
                 </span>

@@ -9,14 +9,14 @@ export class RecordService {
         sortBy?: string,
         sortOrder?: 'asc' | 'desc'
     ): Promise<TableDataResponse> {
-        const params: PaginationParams = {limit, offset, sortBy,sortOrder};
-        const { records,total } = await RecordQueries.getRecords(params);
+        const params: PaginationParams = {limit, offset, sortBy, sortOrder};
+        const {records, total} = await RecordQueries.getRecords(params);
         const columns = RecordQueries.getColums();
 
-        return { records,total,columns }
+        return {records, total, columns}
     }
 
-    static async updateRecordField(recordId: number,field: string, value: any): Promise<Record> {
+    static async updateRecordField(recordId: number, field: string, value: any): Promise<Record> {
         return await RecordQueries.updateRecordField(recordId, field, value);
     }
 }

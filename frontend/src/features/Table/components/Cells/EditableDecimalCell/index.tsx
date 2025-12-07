@@ -1,6 +1,6 @@
 import React, {useState, useRef, memo, useEffect, useMemo} from "react";
 import cln from "classnames";
-import { useTableUpdate } from "@/features/Table/context/TableUpdateContext";
+import {useTableUpdate} from "@/features/Table/context/TableUpdateContext";
 import styles from "./editableDecimalCell.module.scss";
 
 interface EditableDecimalCellProps {
@@ -23,7 +23,7 @@ function EditableDecimalCell({
                                  className = ""
                              }: EditableDecimalCellProps) {
 
-    const { sendUpdate } = useTableUpdate();
+    const {sendUpdate} = useTableUpdate();
 
     const [value, setValue] = useState(initialValue?.toString() || "");
     const [isEditing, setIsEditing] = useState(false);
@@ -90,7 +90,7 @@ function EditableDecimalCell({
 
     const getCurrencySign = (currencyCode: string): string => {
         try {
-            const formatted = (0).toLocaleString('uk-UA', { style: 'currency', currency: currencyCode });
+            const formatted = (0).toLocaleString('uk-UA', {style: 'currency', currency: currencyCode});
             return formatted.replace(/[0-9\s.,]/g, '') || currencyCode;
         } catch {
             return currencyCode;

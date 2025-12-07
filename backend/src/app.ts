@@ -1,5 +1,5 @@
 // backend/src/app.ts
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, {Application, Request, Response, NextFunction} from 'express';
 import cors from 'cors';
 import routes from './routes/index.js';
 
@@ -11,8 +11,8 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({extended: true}));
 
 // Request logging
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -26,7 +26,7 @@ app.use('/api', routes);
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
     res.json({
-        message: 'GuruApps Index API',
+        message: 'AirTable Index API',
         version: '1.0.0',
         endpoints: {
             health: '/api/health',

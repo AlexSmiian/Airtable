@@ -7,7 +7,7 @@ export default function Home() {
         <main>
             <ReactQueryProvider>
                 <TableUpdateProvider>
-                    <TableContent />
+                    <TableContent/>
                 </TableUpdateProvider>
             </ReactQueryProvider>
         </main>

@@ -1,8 +1,8 @@
-import { createServer } from 'http';
+import {createServer} from 'http';
 import app from './app.js';
-import { setupWebSocket } from './websocket/index.js';
-import { checkConnection } from './db/pool.js';
-import { PORT } from './config.js';
+import {setupWebSocket} from './websocket/index.js';
+import {checkConnection} from './db/pool.js';
+import {PORT} from './config.js';
 import {connectRedis, disconnectRedis} from "./redis/index.ts";
 
 const httpServer = createServer(app);
@@ -22,7 +22,6 @@ async function startServer() {
             console.error('⚠️  Warning: Redis not connected. Multi-server sync disabled.');
         }
 
-        // Запускаємо HTTP сервер
         httpServer.listen(PORT, () => {
             console.log(`
 🚀 Server started successfully!
