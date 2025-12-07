@@ -10,6 +10,7 @@ import {RenderMetaCell} from "@/features/Table/components/cells/RenderMetaCell";
 import EditableCell from "@/features/Table/components/cells/EditableCell";
 import EditableSelectCell from "@/features/Table/components/cells/EditableSelectCell";
 import EditableNumberCell from "@/features/Table/components/cells/EditableNumberCell/EditableNumberCell";
+import EditableDecimalCell from "@/features/Table/components/cells/EditableDecimalCell";
 
 const columnHelper = createColumnHelper<IRecord>();
 
@@ -112,11 +113,13 @@ export const columns: ColumnDef<IRecord, any>[] = [
         id: 'amount',
         header: () => "Amount",
         cell: info => (
-            <RenderNumberCell
-                value={info.getValue()}
+            <EditableDecimalCell
+                initialValue={info.getValue()}
+                recordId={info.row.original.id}
                 format="currency"
                 currency="USD"
                 decimals={2}
+                field="amount"
             />
         ),
         enableSorting: true,
